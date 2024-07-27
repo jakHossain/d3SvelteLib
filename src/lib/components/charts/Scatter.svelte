@@ -23,21 +23,26 @@
 	let chartElement;
 
 	const loadChart = () => {
-		const svgWidth = chartElement.width.baseVal.value;
-		const svgHeight = chartElement.height.baseVal.value;
+		const containerWidth = chartElement.offsetWidth;
+		const containerHeight = chartElement.offsetHeight;
+
+		select('.chart-container')
+			.append('svg')
+			.attr('height', containerHeight)
+			.attr('width', containerWidth);
 
 		let scaleX = scaleLinear()
 			.domain([0, 100])
-			.range([0, svgWidth - margin]);
+			.range([0, containerWidth - margin]);
 
 		let scaleY = scaleLinear()
 			.domain([0, 55])
-			.range([svgHeight - margin, 0]);
+			.range([containerHeight - margin, 0]);
 
 		let axisX = axisBottom(scaleX);
 		let axisY = axisLeft(scaleY);
 
-		select('.chart')
+		select('.chart-container svg')
 			.selectAll('circle')
 			.data(data)
 			.join('circle')
@@ -45,13 +50,13 @@
 			.attr('cy', (d, i) => scaleY(d.y) + margin / 2)
 			.attr('r', 10);
 
-		select('.chart')
+		select('.chart-container svg')
 			.append('g')
 			.call(axisX)
-			.attr('transform', `translate(${margin / 2}, ${svgHeight - margin / 2})`)
+			.attr('transform', `translate(${margin / 2}, ${containerHeight - margin / 2})`)
 			.attr('id', 'x-axis');
 
-		select('.chart')
+		select('.chart-container svg')
 			.append('g')
 			.call(axisY)
 			.attr('transform', `translate(${margin / 2},${margin / 2})`)
@@ -59,19 +64,21 @@
 	};
 
 	const updateChartSize = () => {
-		const svgWidth = chartElement.width.baseVal.value;
-		const svgHeight = chartElement.height.baseVal.value;
+		const containerWidth = chartElement.offsetWidth;
+		const containerHeight = chartElement.offsetHeight;
 
 		let scaleX = scaleLinear()
 			.domain([0, 100])
-			.range([0, svgWidth - margin]);
+			.range([0, containerWidth - margin]);
 
 		let scaleY = scaleLinear()
 			.domain([0, 55])
-			.range([svgHeight - margin, 0]);
+			.range([containerHeight - margin, 0]);
 
 		let axisX = axisBottom(scaleX);
 		let axisY = axisLeft(scaleY);
+
+		select('.chart-container svg').attr('height', containerHeight).attr('width', containerWidth);
 
 		selectAll('circle')
 			.transition()
@@ -81,7 +88,7 @@
 		select('#x-axis')
 			.transition()
 			.call(axisX)
-			.attr('transform', `translate(${margin / 2}, ${svgHeight - margin / 2})`);
+			.attr('transform', `translate(${margin / 2}, ${containerHeight - margin / 2})`);
 
 		select('#y-axis')
 			.transition()
@@ -91,19 +98,18 @@
 
 	onMount(() => {
 		loadChart();
-		console.log(chartElement.width.baseVal.value);
 
 		window.addEventListener('resize', updateChartSize);
 	});
 </script>
 
-<svg class="chart" bind:this={chartElement} {width} {height}> </svg>
+<div class="chart-container" bind:this={chartElement} {width} {height}></div>
 
 <style>
-	.chart {
+	.chart-container {
 		width: 100%;
 		height: 100%;
-
+		position: relative;
 		background-color: lightpink;
 	}
 </style>
