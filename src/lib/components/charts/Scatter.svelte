@@ -26,7 +26,7 @@
 		const containerWidth = chartElement.offsetWidth;
 		const containerHeight = chartElement.offsetHeight;
 
-		select('.chart-container')
+		select(chartElement)
 			.append('svg')
 			.attr('height', containerHeight)
 			.attr('width', containerWidth);
@@ -42,21 +42,30 @@
 		let axisX = axisBottom(scaleX);
 		let axisY = axisLeft(scaleY);
 
-		select('.chart-container svg')
+		select(chartElement)
+			.select('svg')
 			.selectAll('circle')
 			.data(data)
 			.join('circle')
 			.attr('cx', (d, i) => scaleX(d.x) + margin / 2)
 			.attr('cy', (d, i) => scaleY(d.y) + margin / 2)
-			.attr('r', 10);
+			.attr('r', 10)
+			.on('mouseover', function (event, d) {
+				select(this).transition().style('stroke', 'white').style('stroke-width', 4).attr('r', 25);
+			})
+			.on('mouseout', function (event, d) {
+				select(this).transition().style('stroke', 'none').style('stroke-width', 0).attr('r', 10);
+			});
 
-		select('.chart-container svg')
+		select(chartElement)
+			.select('svg')
 			.append('g')
 			.call(axisX)
 			.attr('transform', `translate(${margin / 2}, ${containerHeight - margin / 2})`)
 			.attr('id', 'x-axis');
 
-		select('.chart-container svg')
+		select(chartElement)
+			.select('svg')
 			.append('g')
 			.call(axisY)
 			.attr('transform', `translate(${margin / 2},${margin / 2})`)
@@ -96,10 +105,20 @@
 			.attr('transform', `translate(${margin / 2},${margin / 2})`);
 	};
 
+	const spawnTooltip = () => {
+		select(chartElement).append('div').style('position', 'absolute').text('SEFESF');
+	};
+
 	onMount(() => {
 		loadChart();
-
+		spawnTooltip();
 		window.addEventListener('resize', updateChartSize);
+	});
+
+	onDestroy(() => {
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('resize', updateChartSize);
+		}
 	});
 </script>
 
