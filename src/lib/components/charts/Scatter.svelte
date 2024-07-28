@@ -1,9 +1,6 @@
 <script>
 	export let margin = 40;
 
-	export let height;
-	export let width;
-
 	export let data = [
 		{ x: 10, y: 15, label: 'A' },
 		{ x: 20, y: 25, label: 'B' },
@@ -130,19 +127,7 @@
 			.attr('transform', `translate(${margin / 2},${margin / 2})`);
 	};
 
-	// const spawnTooltip = () => {
-	// 	select(chartElement)
-	// 		.append('div')
-	// 		.attr('id', 'tooltip')
-	// 		.style('position', 'fixed')
-	// 		.style('opacity', 0)
-	// 		.style('background', 'white')
-	// 		.style('padding', '0.25em 0.5em')
-	// 		.style('border-radius', '6px');
-	// };
-
 	onMount(() => {
-		// spawnTooltip();
 		loadChart();
 		window.addEventListener('resize', updateChartSize);
 	});
@@ -154,7 +139,7 @@
 	});
 </script>
 
-<div class="chart-container" bind:this={chartElement} {width} {height}>
+<div class="chart-container" bind:this={chartElement}>
 	<div class="tooltip">
 		<h4 class="label">LABEL</h4>
 		<p class="x-coord">XCOORD</p>
