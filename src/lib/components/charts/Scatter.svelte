@@ -51,10 +51,35 @@
 			.attr('cy', (d, i) => scaleY(d.y) + margin / 2)
 			.attr('r', 10)
 			.on('mouseover', function (event, d) {
-				select(this).transition().style('stroke', 'white').style('stroke-width', 4).attr('r', 25);
+				select(this).style('stroke', 'white').style('stroke-width', '1.5px');
+			})
+			.on('mousemove', function (event, d) {
+				let position = this.getBoundingClientRect();
+
+				const datum = select(this).datum();
+
+				select(chartElement)
+					.select('.tooltip')
+					.style('left', `${position.left + 30}px`)
+					.style('top', `${position.top + 20}px`)
+					.style('opacity', 1)
+					.select('.label')
+					.html(datum.label);
+
+				select(chartElement)
+					.select('.tooltip')
+					.select('.x-coord')
+					.html('X: ' + datum.x);
+
+				select(chartElement)
+					.select('.tooltip')
+					.select('.y-coord')
+					.html('Y: ' + datum.y);
 			})
 			.on('mouseout', function (event, d) {
-				select(this).transition().style('stroke', 'none').style('stroke-width', 0).attr('r', 10);
+				select(this).style('stroke', 'none').style('stroke-width', '0px').attr('r', 10);
+
+				select(chartElement).select('.tooltip').style('opacity', 0);
 			});
 
 		select(chartElement)
@@ -105,13 +130,20 @@
 			.attr('transform', `translate(${margin / 2},${margin / 2})`);
 	};
 
-	const spawnTooltip = () => {
-		select(chartElement).append('div').style('position', 'absolute').text('SEFESF');
-	};
+	// const spawnTooltip = () => {
+	// 	select(chartElement)
+	// 		.append('div')
+	// 		.attr('id', 'tooltip')
+	// 		.style('position', 'fixed')
+	// 		.style('opacity', 0)
+	// 		.style('background', 'white')
+	// 		.style('padding', '0.25em 0.5em')
+	// 		.style('border-radius', '6px');
+	// };
 
 	onMount(() => {
+		// spawnTooltip();
 		loadChart();
-		spawnTooltip();
 		window.addEventListener('resize', updateChartSize);
 	});
 
@@ -122,7 +154,13 @@
 	});
 </script>
 
-<div class="chart-container" bind:this={chartElement} {width} {height}></div>
+<div class="chart-container" bind:this={chartElement} {width} {height}>
+	<div class="tooltip">
+		<h4 class="label">LABEL</h4>
+		<p class="x-coord">XCOORD</p>
+		<p class="y-coord">YCOORD</p>
+	</div>
+</div>
 
 <style>
 	.chart-container {
@@ -130,5 +168,18 @@
 		height: 100%;
 		position: relative;
 		background-color: lightpink;
+	}
+
+	.tooltip {
+		position: fixed;
+		opacity: 0;
+		background-color: antiquewhite;
+		padding: 0.25em 0.5em;
+		border-radius: 4px;
+	}
+
+	.tooltip h4,
+	p {
+		margin: 0;
 	}
 </style>

@@ -12,7 +12,7 @@
 		height: 60vh;
 		margin: auto;
 
-		min-width: 300px;
+		min-width: 500px;
 		min-height: 250px;
 	}
 </style>
