@@ -6,16 +6,21 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { scaleLinear, select, selectAll, axisBottom, axisLeft } from 'd3';
 
+	function debounce(func, wait) {
+		let timeout;
+		return function (...args) {
+			clearTimeout(timeout);
+			timeout = setTimeout(() => func.apply(this, args), wait);
+		};
+	}
+
 	let chartElement;
 
 	const loadChart = () => {
 		const containerWidth = chartElement.offsetWidth;
 		const containerHeight = chartElement.offsetHeight;
 
-		select(chartElement)
-			.append('svg')
-			.attr('height', containerHeight)
-			.attr('width', containerWidth);
+		select(chartElement).append('svg').attr('height', '100%').attr('width', '100%');
 
 		let scaleX = scaleLinear()
 			.domain([0, 100])
@@ -98,9 +103,8 @@
 		let axisX = axisBottom(scaleX);
 		let axisY = axisLeft(scaleY);
 
-		select('.chart-container svg').attr('height', containerHeight).attr('width', containerWidth);
-
-		selectAll('circle')
+		select(chartElement)
+			.selectAll('circle')
 			.transition()
 			.attr('cx', (d, i) => scaleX(d.x) + margin / 2)
 			.attr('cy', (d, i) => scaleY(d.y) + margin / 2);

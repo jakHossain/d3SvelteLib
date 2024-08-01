@@ -3,6 +3,7 @@
 	import Scatter from '../lib/components/charts/Scatter.svelte';
 
 	let data = [
+		{ x: 0, y: 4, label: 'A' },
 		{ x: 10, y: 15, label: 'A' },
 		{ x: 20, y: 25, label: 'B' },
 		{ x: 30, y: 10, label: 'C' },
