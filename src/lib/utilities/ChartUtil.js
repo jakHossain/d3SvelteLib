@@ -1,7 +1,7 @@
 import { max, min, scaleLinear } from 'd3';
 
 export const generateLinearXScale = (data, chartContainerRef, minVal, maxVal, margin) => {
-	const containerWidth = chartContainerRef.offsetHeight;
+	const containerWidth = chartContainerRef.offsetWidth;
 
 	const xScale = scaleLinear()
 		.domain([minVal || min(data, (d) => d.x), maxVal || max(data, (d) => d.x)])
@@ -15,14 +15,16 @@ export const generateLinearYScale = (data, chartContainerRef, minVal, maxVal, ma
 
 	const yScale = scaleLinear()
 		.domain([minVal || min(data, (d) => d.y), maxVal || max(data, (d) => d.y)])
-		.range([containerHeight - (margin || 0)], 0);
+		.range([containerHeight - (margin || 0), 0]);
 
 	return yScale;
 };
 
-export const generateLinearScales = (data, chartContainerRef, xMin, xMax, yMin, yMin, margin) => {
+export const generateLinearScales = (data, chartContainerRef, xMin, xMax, yMin, yMax, margin) => {
 	const xScale = generateLinearXScale(data, chartContainerRef, xMin, xMax, margin);
 	const yScale = generateLinearYScale(data, chartContainerRef, yMin, yMin, margin);
+
+	console.log('dwadawd', xScale);
 
 	return { xScale, yScale };
 };

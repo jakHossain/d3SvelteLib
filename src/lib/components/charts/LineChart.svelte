@@ -23,16 +23,8 @@
 
 	const loadChart = () => {
 		const svg = select(chartContainer).append('svg').attr('height', '100%').attr('width', '100%');
-		const containerWidth = chartContainer.offsetWidth;
-		const containerHeight = chartContainer.offsetHeight;
 
-		const xScale = scaleLinear()
-			.domain([0, max(data, (d) => d.x)])
-			.range([0, containerWidth - margin]);
-
-		const yScale = scaleLinear()
-			.domain([0, max(data, (d) => d.y)])
-			.range([containerHeight - margin, 0]);
+		const { xScale, yScale } = generateLinearScales(data, chartContainer, 0, null, 0, null, margin);
 
 		const yAxis = axisLeft(yScale);
 		const xAxis = axisBottom(xScale);
@@ -51,7 +43,7 @@
 		svg
 			.append('g')
 			.call(xAxis)
-			.attr('transform', `translate(${margin / 2}, ${containerHeight - margin / 2})`);
+			.attr('transform', `translate(${margin / 2}, ${chartContainer.offsetHeight - margin / 2})`);
 
 		//line path
 		svg
