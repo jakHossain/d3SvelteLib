@@ -1,6 +1,7 @@
 <script>
 	import { axisBottom, axisLeft, extent, line, max, scaleLinear, select } from 'd3';
 	import { onMount, onDestroy } from 'svelte';
+	import { generateLinearScales } from '../../utilities/ChartUtil';
 
 	import ToolTip from './interaction/Tooltip.svelte';
 	import { initializeToolTip } from './interaction/TooltipUtility';
@@ -76,10 +77,20 @@
 			.attr('cy', (d, i) => {
 				return yScale(d.y) + margin / 2;
 			})
-			.attr('r', 5)
+			.attr('r', 6)
 			.on('mouseover', function (event, d) {
+				select(this).attr('stroke-width', '1px').attr('stroke', 'white');
+			})
+			.on('mousemove', function (event, d) {
 				const position = event.target.getBoundingClientRect();
-				enable({ top: position.top, left: position.left });
+				const datum = select(this).datum();
+
+				enable({ top: position.top, left: position.left }, `${datum.x}`);
+			})
+			.on('mouseout', function (event, d) {
+				select(this).attr('stroke-width', '0px').attr('stroke', 'black');
+
+				disable();
 			});
 	};
 

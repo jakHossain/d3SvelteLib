@@ -11,10 +11,9 @@ export const initializeToolTip = () => {
 
 	return {
 		subscribe,
-		enable: (position) => {
-			console.log('FESF');
+		enable: (position, body) => {
 			update((state) => {
-				return { ...state, active: true, position };
+				return { ...state, active: true, position, body };
 			});
 		},
 		disable: () => {
