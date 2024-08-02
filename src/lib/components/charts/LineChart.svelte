@@ -1,11 +1,24 @@
 <script>
-	export let margin = 50;
-	export let data;
-
 	import { axisBottom, axisLeft, extent, line, max, scaleLinear, select } from 'd3';
 	import { onMount, onDestroy } from 'svelte';
 
+	import ToolTip from './interaction/Tooltip.svelte';
+	import { initializeToolTip } from './interaction/TooltipUtility';
+
+	export let margin = 50;
+	export let data;
+
 	let chartContainer;
+
+	const { enable, disable, reset, subscribe } = initializeToolTip();
+
+	let tooltipState;
+
+	const unsubscribeTooltip = subscribe((state) => {
+		console.log('uploading state:', state);
+		tooltipState = state;
+		console.log(tooltipState);
+	});
 
 	const loadChart = () => {
 		const svg = select(chartContainer).append('svg').attr('height', '100%').attr('width', '100%');
@@ -63,15 +76,25 @@
 			.attr('cy', (d, i) => {
 				return yScale(d.y) + margin / 2;
 			})
-			.attr('r', 5);
+			.attr('r', 5)
+			.on('mouseover', function (event, d) {
+				const position = event.target.getBoundingClientRect();
+				enable({ top: position.top, left: position.left });
+			});
 	};
 
 	onMount(() => {
 		loadChart();
 	});
+
+	onDestroy(() => {
+		unsubscribeTooltip();
+	});
 </script>
 
-<div class="chart-container" bind:this={chartContainer}></div>
+<div class="chart-container" bind:this={chartContainer}>
+	<ToolTip {tooltipState} chartContainerRef={chartContainer} />
+</div>
 
 <style>
 	.chart-container {
