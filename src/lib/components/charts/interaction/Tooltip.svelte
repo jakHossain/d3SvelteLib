@@ -1,41 +1,69 @@
 <script>
 	import { fade } from 'svelte/transition';
-	import { beforeUpdate, afterUpdate } from 'svelte';
-	import { html } from 'd3';
+	import { onMount } from 'svelte';
 
 	export let tooltipState;
 	export let chartContainerRef;
 
-	let leftPos, topPos;
+	let toolTipRef;
+
+	let leftPos = '0px';
+	let topPos = '0px';
+
+	const updateToolTipPosition = (position, chartContainerRef, toolTipRef) => {
+		if (!position || !chartContainerRef || !toolTipRef) return;
+
+		const containerBounds = chartContainerRef.getBoundingClientRect();
+		const toolTipBounds = toolTipRef.getBoundingClientRect();
+
+		const widthOutRight = position.left + 20 + toolTipBounds.width > containerBounds.right;
+		const heightOutTop = position.top + 20 + toolTipBounds.height > containerBounds.bottom;
+
+		topPos = position.top + 16 + 'px';
+		leftPos = position.left + 16 + 'px';
+
+		if (widthOutRight) {
+			leftPos = position.left - 4 - toolTipBounds.width + 'px';
+		}
+
+		if (heightOutTop) {
+			topPos = position.top - 4 - toolTipBounds.height + 'px';
+		}
+	};
 
 	$: {
-		leftPos = tooltipState.position.left + 16 + 'px';
-		topPos = tooltipState.position.top + 16 + 'px';
+		updateToolTipPosition(tooltipState.position, chartContainerRef, toolTipRef);
 	}
+
+	onMount(() => {
+		console.log('TEST', chartContainerRef.getBoundingClientRect());
+		console.log('TooltipRef', toolTipRef.getBoundingClientRect());
+	});
 </script>
 
-{#if tooltipState?.active}
-	<div
-		class="tooltip"
-		style={`left: ${leftPos}; top: ${topPos};`}
-		transition:fade={{ duration: 200 }}
-	>
-		<div>{tooltipState.label}</div>
-		<div>{tooltipState.body}</div>
-	</div>
-{/if}
+<div
+	bind:this={toolTipRef}
+	class="tooltip"
+	class:active={tooltipState?.active}
+	style={`left: ${leftPos}; top: ${topPos};`}
+>
+	<div>{tooltipState.label}</div>
+	<div>{tooltipState.body}</div>
+</div>
 
 <style>
 	.tooltip {
 		position: fixed;
+		opacity: 0;
 		z-index: 5;
 		padding: 0.5em;
 		background-color: white;
 		border: solid black 1px;
 		border-radius: 6px;
+		transition: opacity 200ms ease-out;
 	}
-	.tooltip h4,
-	.tooltip p {
-		margin: 0;
+
+	.tooltip.active {
+		opacity: 1;
 	}
 </style>

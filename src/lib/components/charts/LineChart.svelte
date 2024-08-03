@@ -16,9 +16,7 @@
 	let tooltipState;
 
 	const unsubscribeTooltip = subscribe((state) => {
-		console.log('uploading state:', state);
 		tooltipState = state;
-		console.log(tooltipState);
 	});
 
 	const loadChart = () => {
@@ -77,7 +75,7 @@
 				const position = event.target.getBoundingClientRect();
 				const datum = select(this).datum();
 
-				enable({ top: position.top, left: position.left }, `${datum.x}`);
+				enable({ top: position.top, left: position.left }, datum.x, datum.label);
 			})
 			.on('mouseout', function (event, d) {
 				select(this).attr('stroke-width', '0px').attr('stroke', 'black');
@@ -96,7 +94,9 @@
 </script>
 
 <div class="chart-container" bind:this={chartContainer}>
-	<ToolTip {tooltipState} chartContainerRef={chartContainer} />
+	{#if chartContainer}
+		<ToolTip {tooltipState} chartContainerRef={chartContainer} />
+	{/if}
 </div>
 
 <style>

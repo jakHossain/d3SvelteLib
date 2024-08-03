@@ -11,9 +11,9 @@ export const initializeToolTip = () => {
 
 	return {
 		subscribe,
-		enable: (position, body) => {
+		enable: (position, body, label) => {
 			update((state) => {
-				return { ...state, active: true, position, body };
+				return { ...state, active: true, position, body, label };
 			});
 		},
 		disable: () => {
