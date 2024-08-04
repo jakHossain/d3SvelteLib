@@ -1,15 +1,27 @@
 <script>
 	import { axisBottom, axisLeft, extent, line, max, scaleLinear, select } from 'd3';
 	import { onMount, onDestroy } from 'svelte';
-	import { generateLinearScales } from '../../utilities/ChartUtil';
+	import {
+		generateLinearScales,
+		resizeScales,
+		updatePointPosition,
+		updateLinePath
+	} from '../../utilities/ChartUtil';
 
 	import ToolTip from './interaction/Tooltip.svelte';
 	import { initializeToolTip } from './interaction/TooltipUtility';
 
-	export let margin = 50;
 	export let data;
+	export let margin = 50;
+	export let xMin = 0;
+	export let xMax = null;
+	export let yMin = 0;
+	export let yMax = null;
 
 	let chartContainer;
+	let xAxis;
+	let yAxis;
+	let linePath;
 
 	const { enable, disable, reset, subscribe } = initializeToolTip();
 
@@ -22,29 +34,37 @@
 	const loadChart = () => {
 		const svg = select(chartContainer).append('svg').attr('height', '100%').attr('width', '100%');
 
-		const { xScale, yScale } = generateLinearScales(data, chartContainer, 0, null, 0, null, margin);
+		const { xScale, yScale } = generateLinearScales(
+			data,
+			chartContainer,
+			xMin,
+			xMax,
+			yMin,
+			yMax,
+			margin
+		);
 
-		const yAxis = axisLeft(yScale);
-		const xAxis = axisBottom(xScale);
+		const yAxisScale = axisLeft(yScale);
+		const xAxisScale = axisBottom(xScale);
 
 		const lineData = line()
 			.x((d, i) => xScale(d.x))
 			.y((d, i) => yScale(d.y));
 
 		//y-axis
-		svg
+		yAxis = svg
 			.append('g')
-			.call(yAxis)
+			.call(yAxisScale)
 			.attr('transform', `translate(${margin / 2}, ${margin / 2})`);
 
 		//x-axis
-		svg
+		xAxis = svg
 			.append('g')
-			.call(xAxis)
+			.call(xAxisScale)
 			.attr('transform', `translate(${margin / 2}, ${chartContainer.offsetHeight - margin / 2})`);
 
 		//line path
-		svg
+		linePath = svg
 			.append('g')
 			.append('path')
 			.datum(data)
@@ -84,12 +104,34 @@
 			});
 	};
 
+	const updateChartResizeController = () => {
+		const { xScale, yScale } = resizeScales(
+			data,
+			chartContainer,
+			xAxis,
+			yAxis,
+			xMin,
+			xMax,
+			yMin,
+			yMax,
+			margin
+		);
+		updatePointPosition(data, chartContainer, xScale, yScale, margin);
+		updateLinePath(data, linePath, xScale, yScale, margin);
+	};
+
 	onMount(() => {
 		loadChart();
+		if (typeof window !== 'undefined') {
+			window.addEventListener('resize', updateChartResizeController);
+		}
 	});
 
 	onDestroy(() => {
 		unsubscribeTooltip();
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('resize', updateChartResizeController);
+		}
 	});
 </script>
 

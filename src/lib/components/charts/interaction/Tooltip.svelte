@@ -1,5 +1,4 @@
 <script>
-	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 
 	export let tooltipState;
