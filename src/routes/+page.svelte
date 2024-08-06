@@ -1,7 +1,8 @@
 <script>
 	import LineChart from '../lib/components/charts/LineChart.svelte';
 	import Scatter from '../lib/components/charts/Scatter.svelte';
-
+	import { onMount } from 'svelte';
+	import { readCsv } from '../lib/utilities/CSVParsingUtil';
 	let data = [
 		{ x: 0, y: 4, label: 'A' },
 		{ x: 10, y: 15, label: 'A' },
@@ -15,6 +16,13 @@
 		{ x: 90, y: 55, label: 'I' },
 		{ x: 100, y: 50, label: 'J' }
 	];
+
+	const csvUrl = '../src/assets/low_high_actual_data.csv';
+	onMount(async () => {
+		const csvData = await (await fetch(csvUrl)).text();
+		const data = await readCsv(csvData);
+		console.log(data);
+	});
 </script>
 
 <main>
