@@ -74,10 +74,10 @@ export const updatePointPosition = (data, chartContainerRef, xScale, yScale, mar
 		.attr('cy', (d, i) => yScale(d.y) + margin / 2);
 };
 
-export const updateLinePath = (data, linePath, xScale, yScale, margin) => {
+export const updateLinePath = (chartContainerRef, xScale, yScale, margin) => {
 	const lineData = line()
 		.x((d, i) => xScale(d.x))
 		.y((d, i) => yScale(d.y));
 
-	linePath.transition().attr('d', lineData(data));
+	select(chartContainerRef).select('.line').transition().attr('d', lineData);
 };

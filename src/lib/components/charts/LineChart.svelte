@@ -54,12 +54,14 @@
 		//y-axis
 		yAxis = svg
 			.append('g')
+			.attr('class', 'y-axis axis')
 			.call(yAxisScale)
 			.attr('transform', `translate(${margin / 2}, ${margin / 2})`);
 
 		//x-axis
 		xAxis = svg
 			.append('g')
+			.attr('class', 'x-axis axis')
 			.call(xAxisScale)
 			.attr('transform', `translate(${margin / 2}, ${chartContainer.offsetHeight - margin / 2})`);
 
@@ -70,7 +72,7 @@
 			.datum(data)
 			.attr('d', lineData)
 			.attr('transform', `translate(${margin / 2}, ${margin / 2})`)
-			.attr('class', 'line')
+			.attr('class', 'line data-line')
 			.attr('fill', 'none')
 			.style('stroke-width', '2px')
 			.style('stroke', 'black');
@@ -117,7 +119,7 @@
 			margin
 		);
 		updatePointPosition(data, chartContainer, xScale, yScale, margin);
-		updateLinePath(data, linePath, xScale, yScale, margin);
+		updateLinePath(chartContainer, xScale, yScale, margin);
 	};
 
 	onMount(() => {
