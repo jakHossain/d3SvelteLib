@@ -3,6 +3,9 @@
 	import Scatter from '../lib/components/charts/Scatter.svelte';
 	import { onMount } from 'svelte';
 	import { readCsv } from '../lib/utilities/CSVParsingUtil';
+	import PollChart from '../lib/components/charts/PollChart.svelte';
+	import { getMaxFromArray, getMinFromArray } from '../lib/utilities/ChartUtil';
+
 	let data = [
 		{ x: 0, y: 4, label: 'A' },
 		{ x: 10, y: 15, label: 'A' },
@@ -17,17 +20,21 @@
 		{ x: 100, y: 50, label: 'J' }
 	];
 
-	const csvUrl = '../src/assets/low_high_actual_data.csv';
+	let predictionLineData;
+
+	const csvUrl = '../src/assets/poll_data.csv';
 	onMount(async () => {
 		const csvData = await (await fetch(csvUrl)).text();
-		const data = await readCsv(csvData);
-		console.log(data);
+		predictionLineData = await readCsv(csvData);
+		console.log(predictionLineData);
 	});
 </script>
 
 <main>
-	<Scatter margin={50} {data} />
-	<LineChart margin={50} {data} />
+	<!-- <LineChart margin={50} {data} /> -->
+	{#if predictionLineData}
+		<PollChart data={predictionLineData.data} margin={50} />
+	{/if}
 </main>
 
 <style>
