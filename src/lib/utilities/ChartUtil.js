@@ -81,3 +81,17 @@ export const updateLinePath = (chartContainerRef, xScale, yScale, margin) => {
 
 	select(chartContainerRef).select('.line').transition().attr('d', lineData);
 };
+
+export const getMinFromArray = (data) => {
+	return min(data, (d) => {
+		const minimum = min(d.slice(1, d.length));
+		return minimum;
+	});
+};
+
+export const getMaxFromArray = (data) => {
+	return max(data, (d) => {
+		const maximum = max(d.slice(1, d.length));
+		return maximum;
+	});
+};
