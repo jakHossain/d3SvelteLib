@@ -1,5 +1,5 @@
 <script>
-	import { select, area, max, min, scaleLinear, axisBottom, axisLeft, line } from 'd3';
+	import { select, selectAll, area, max, min, scaleLinear, axisBottom, axisLeft, line } from 'd3';
 	import {
 		generateLinearXScale,
 		getMaxFromArray,
@@ -25,18 +25,19 @@
 	data.shift();
 
 	if (!minX) {
-		minX = min(data, (d) => d[0]);
+		minX = Math.round(min(data, (d) => d[0]));
 	}
 	if (!minY) {
-		minY = getMinFromArray(data);
+		minY = Math.round(getMinFromArray(data));
 	}
 	if (!maxX) {
-		maxX = max(data, (d) => d[0]);
+		maxX = Math.round(max(data, (d) => d[0]));
 	}
 	if (!maxY) {
-		maxY = getMaxFromArray(data);
+		maxY = Math.round(getMaxFromArray(data));
 	}
 
+	console.log('Y min:', minY, ' Y MAx: ', maxY);
 	const loadChart = (chartContainerRef, data) => {
 		console.log(chartContainerRef);
 		const xScale = scaleLinear()
@@ -75,9 +76,10 @@
 
 		svg = select(chartContainerRef)
 			.append('svg')
-			.attr('height', '100%')
-			.attr('width', '100%')
-			.attr('transform', `translate(${margin / 2},${margin / 2})`);
+			.attr('height', chartContainerRef.offsetHeight - margin)
+			.attr('width', chartContainerRef.offsetWidth - margin)
+			.attr('transform', `translate(${margin / 2},${margin / 2})`)
+			.style('position', 'relative');
 
 		yAxis = svg
 			.append('g')
@@ -94,7 +96,9 @@
 			.append('path')
 			.attr('d', areaGenerator1(data))
 			.attr('transform', `translate(${margin / 2}, 0)`)
-			.attr('fill', 'pink');
+			.attr('fill', 'pink')
+			.attr('opacity', 0.75);
+
 		svg
 			.append('g')
 			.append('path')
@@ -109,7 +113,8 @@
 			.append('path')
 			.attr('d', areaGenerator2(data))
 			.attr('transform', `translate(${margin / 2}, 0)`)
-			.attr('fill', 'lightblue');
+			.attr('fill', 'lightblue')
+			.attr('opacity', 0.75);
 
 		svg
 			.append('g')
@@ -121,11 +126,31 @@
 			.attr('fill', 'none');
 	};
 
+	const loadInteractionWindow = (svg) => {
+		if (!svg) return;
+
+		const svgElement = svg.node();
+
+		svg
+			.append('rect')
+			.attr('fill', 'lightblue')
+			.attr('x', 0)
+			.attr('width', svgElement.getBoundingClientRect().width)
+			.attr('y', 0)
+			.attr('height', '100%')
+			.attr('opacity', 0.4);
+	};
+
 	onMount(() => {
 		if (chartContainerRef && data) {
 			console.log('present', data);
 			loadChart(chartContainerRef, data);
 		}
+
+		loadInteractionWindow(svg);
+
+		const lines = select('path');
+		console.log(lines);
 	});
 </script>
 
@@ -139,6 +164,6 @@
 	.chart-container {
 		height: 100%;
 		width: 100%;
-		background-color: aquamarine;
+		border: solid black 1px;
 	}
 </style>
