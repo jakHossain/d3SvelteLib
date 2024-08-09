@@ -1,5 +1,17 @@
 <script>
-	import { select, selectAll, area, max, min, scaleLinear, axisBottom, axisLeft, line } from 'd3';
+	import {
+		select,
+		selectAll,
+		area,
+		max,
+		min,
+		scaleLinear,
+		axisBottom,
+		axisLeft,
+		line,
+		pointer,
+		style
+	} from 'd3';
 	import {
 		generateLinearXScale,
 		getMaxFromArray,
@@ -131,14 +143,42 @@
 
 		const svgElement = svg.node();
 
-		svg
-			.append('rect')
+		const interactionWindow = svg.append('rect');
+
+		interactionWindow
 			.attr('fill', 'lightblue')
 			.attr('x', 0)
-			.attr('width', svgElement.getBoundingClientRect().width)
+			.attr('width', svgElement.getBoundingClientRect().width - margin / 2)
 			.attr('y', 0)
 			.attr('height', '100%')
-			.attr('opacity', 0.4);
+			.attr('opacity', 0.4)
+			.attr('transform', `translate(${margin / 2},0)`);
+
+		const interactionWindowNode = interactionWindow.node();
+
+		const lineHover = svg
+			.append('line')
+			.attr('y2', 0)
+			.attr('y1', interactionWindowNode.getBoundingClientRect().height)
+			.attr('x1', margin / 2)
+			.attr('x2', margin / 2)
+			.attr('stroke', 'black') // color of the line
+			.attr('stroke-width', '1px')
+			.style('stroke-dasharray', '3, 3')
+			.style('display', 'none');
+
+		interactionWindow
+			.on('mouseenter', function () {
+				lineHover.style('display', 'block');
+			})
+			.on('mouseout', function () {
+				lineHover.style('display', 'none');
+			})
+			.on('mousemove', function (event, d) {
+				const [x, y] = pointer(event);
+				lineHover.attr('x1', x + margin / 2).attr('x2', x + margin / 2);
+			})
+			.raise();
 	};
 
 	onMount(() => {
