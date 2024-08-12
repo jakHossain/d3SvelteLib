@@ -23,6 +23,8 @@
 	let yAxis;
 	let linePath;
 
+	let displayValue = { x: '', y: '', label: '' };
+
 	const { enable, disable, reset, subscribe } = initializeToolTip();
 
 	let tooltipState;
@@ -98,6 +100,10 @@
 				const datum = select(this).datum();
 
 				enable({ top: position.top, left: position.left }, datum.x, datum.label);
+
+				displayValue.x = datum.x;
+				displayValue.y = datum.y;
+				displayValue.label = datum.label;
 			})
 			.on('mouseout', function (event, d) {
 				select(this).attr('stroke-width', '0px').attr('stroke', 'black');
@@ -139,7 +145,11 @@
 
 <div class="chart-container" bind:this={chartContainer}>
 	{#if chartContainer}
-		<ToolTip {tooltipState} chartContainerRef={chartContainer} />
+		<ToolTip {tooltipState} chartContainerRef={chartContainer}>
+			<p class="labelText"><strong>{displayValue.label}</strong></p>
+			<p class="labelText"><strong>X:</strong> {displayValue.x}</p>
+			<p class="labelText"><strong>Y:</strong> {displayValue.x}</p>
+		</ToolTip>
 	{/if}
 </div>
 
@@ -148,5 +158,8 @@
 		height: 100%;
 		width: 100%;
 		background-color: aquamarine;
+	}
+	.labelText {
+		margin: 0;
 	}
 </style>

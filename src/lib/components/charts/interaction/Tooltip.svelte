@@ -46,8 +46,7 @@
 	class:active={tooltipState?.active}
 	style={`left: ${leftPos}; top: ${topPos};`}
 >
-	<div>{tooltipState.label}</div>
-	<div>{tooltipState.body}</div>
+	<slot></slot>
 </div>
 
 <style>

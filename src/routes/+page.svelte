@@ -31,10 +31,10 @@
 </script>
 
 <main>
-	<!-- <LineChart margin={50} {data} /> -->
-	{#if predictionLineData}
+	<LineChart margin={50} {data} />
+	<!-- {#if predictionLineData}
 		<PollChart data={predictionLineData.data} margin={50} />
-	{/if}
+	{/if} -->
 </main>
 
 <style>

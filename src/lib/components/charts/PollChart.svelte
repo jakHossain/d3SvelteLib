@@ -10,7 +10,7 @@
 		axisLeft,
 		line,
 		pointer,
-		style
+		bisector
 	} from 'd3';
 	import {
 		generateLinearXScale,
@@ -31,28 +31,30 @@
 	let svg;
 	let xAxis;
 	let yAxis;
+	let xScale;
 
 	//get min/max values for x and y axis if not propped.
 
-	data.shift();
+	const adjustDataMinMax = () => {
+		data.shift();
 
-	if (!minX) {
-		minX = Math.round(min(data, (d) => d[0]));
-	}
-	if (!minY) {
-		minY = Math.round(getMinFromArray(data));
-	}
-	if (!maxX) {
-		maxX = Math.round(max(data, (d) => d[0]));
-	}
-	if (!maxY) {
-		maxY = Math.round(getMaxFromArray(data));
-	}
+		if (!minX) {
+			minX = Math.round(min(data, (d) => d[0]));
+		}
+		if (!minY) {
+			minY = Math.round(getMinFromArray(data));
+		}
+		if (!maxX) {
+			maxX = Math.round(max(data, (d) => d[0]));
+		}
+		if (!maxY) {
+			maxY = Math.round(getMaxFromArray(data));
+		}
+	};
 
-	console.log('Y min:', minY, ' Y MAx: ', maxY);
 	const loadChart = (chartContainerRef, data) => {
 		console.log(chartContainerRef);
-		const xScale = scaleLinear()
+		xScale = scaleLinear()
 			.domain([minX, maxX])
 			.range([0, chartContainerRef.offsetWidth - (3 * margin) / 2]);
 
@@ -91,7 +93,9 @@
 			.attr('height', chartContainerRef.offsetHeight - margin)
 			.attr('width', chartContainerRef.offsetWidth - margin)
 			.attr('transform', `translate(${margin / 2},${margin / 2})`)
-			.style('position', 'relative');
+			.style('position', 'relative')
+			.style('border', 'black 2px solid')
+			.datum(data);
 
 		yAxis = svg
 			.append('g')
@@ -174,14 +178,18 @@
 			.on('mouseout', function () {
 				lineHover.style('display', 'none');
 			})
-			.on('mousemove', function (event, d) {
-				const [x, y] = pointer(event);
-				lineHover.attr('x1', x + margin / 2).attr('x2', x + margin / 2);
+			.on('mousemove', function (event) {
+				const [defaultX, y] = pointer(event);
+				const [svgX, ye] = pointer(event, svgElement);
+				lineHover.attr('x1', svgX).attr('x2', svgX);
+				const test = bisector((d) => d[0]).center(svg.datum(), xScale.invert(Math.floor(defaultX)));
+				console.log(svg.datum().length, svg.datum()[test], xScale.invert(defaultX), defaultX);
 			})
 			.raise();
 	};
 
 	onMount(() => {
+		adjustDataMinMax();
 		if (chartContainerRef && data) {
 			console.log('present', data);
 			loadChart(chartContainerRef, data);
