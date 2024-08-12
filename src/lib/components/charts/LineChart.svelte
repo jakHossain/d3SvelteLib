@@ -99,7 +99,7 @@
 				const position = event.target.getBoundingClientRect();
 				const datum = select(this).datum();
 
-				enable({ top: position.top, left: position.left }, datum.x, datum.label);
+				enable({ top: position.top, left: position.left });
 
 				displayValue.x = datum.x;
 				displayValue.y = datum.y;

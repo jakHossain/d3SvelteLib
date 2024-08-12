@@ -20,6 +20,8 @@
 	import Tooltip from './interaction/Tooltip.svelte';
 	import { onMount, onDestroy } from 'svelte';
 
+	import { initializeToolTip } from './interaction/TooltipUtility';
+
 	export let data;
 	export let margin = 50;
 	export let minX;
@@ -32,6 +34,18 @@
 	let xAxis;
 	let yAxis;
 	let xScale;
+
+	let toolTipLabels = {
+		year: '',
+		candidate1: '',
+		candidate2: '',
+		cand1Act: 0,
+		cand1Low: 0,
+		cand1High: 0,
+		cand2Act: 0,
+		cand2Low: 0,
+		cand2High: 0
+	};
 
 	//get min/max values for x and y axis if not propped.
 
@@ -142,6 +156,13 @@
 			.attr('fill', 'none');
 	};
 
+	const { subscribe, enable, disable } = initializeToolTip();
+
+	let tooltipState;
+	const unsubscribeTooltip = subscribe((state) => {
+		tooltipState = state;
+	});
+
 	const loadInteractionWindow = (svg) => {
 		if (!svg) return;
 
@@ -172,18 +193,46 @@
 			.style('display', 'none');
 
 		interactionWindow
-			.on('mouseenter', function () {
+			.on('mouseenter', function (event) {
 				lineHover.style('display', 'block');
 			})
 			.on('mouseout', function () {
+				disable();
 				lineHover.style('display', 'none');
 			})
 			.on('mousemove', function (event) {
 				const [defaultX, y] = pointer(event);
-				const [svgX, ye] = pointer(event, svgElement);
+				const [svgX, svgY] = pointer(event, svgElement);
+
 				lineHover.attr('x1', svgX).attr('x2', svgX);
-				const test = bisector((d) => d[0]).center(svg.datum(), xScale.invert(Math.floor(defaultX)));
-				console.log(svg.datum().length, svg.datum()[test], xScale.invert(defaultX), defaultX);
+
+				const chartData = svg.datum();
+				const dataIndex = bisector((d) => d[0]).center(
+					chartData,
+					xScale.invert(Math.floor(defaultX))
+				);
+				console.log(svg.datum()[dataIndex]);
+
+				const [year, cand1Act, cand1Low, cand1High, cand2Act, cand2Low, cand2High] =
+					chartData[dataIndex];
+
+				toolTipLabels = {
+					year,
+					cand1Act,
+					cand1Low,
+					cand1High,
+					cand2Act,
+					cand2Low,
+					cand2High,
+					candidate1: '',
+					candidate2: ''
+				};
+
+				const svgElementViewPortPos = svgElement.getBoundingClientRect();
+				enable({
+					top: svgY + svgElementViewPortPos.top,
+					left: svgX + svgElementViewPortPos.left
+				});
 			})
 			.raise();
 	};
@@ -200,12 +249,32 @@
 		const lines = select('path');
 		console.log(lines);
 	});
+
+	onDestroy(() => {
+		unsubscribeTooltip();
+		if (typeof window == 'undefined') {
+		}
+	});
 </script>
 
 <div class="chart-container" bind:this={chartContainerRef}>
-	<!-- {#if chartContainerRef}
-		<Tooltip {tooltipState} {chartContainerRef} />
-	{/if} -->
+	{#if chartContainerRef}
+		<Tooltip {tooltipState} {chartContainerRef}>
+			<h3>{toolTipLabels.year}</h3>
+			<div class="tooltipTextContainer">
+				<h4>{toolTipLabels.candidate1}</h4>
+				<p><strong>Actual:</strong> {toolTipLabels.cand1Act.toFixed(2)}%</p>
+				<p><strong>High:</strong> {toolTipLabels.cand1High.toFixed(2)}%</p>
+				<p><strong>Low:</strong> {toolTipLabels.cand1Low.toFixed(2)}%</p>
+			</div>
+			<div class="tooltipTextContainer">
+				<h4>{toolTipLabels.candidate2}</h4>
+				<p><strong>Actual:</strong> {toolTipLabels.cand2Act.toFixed(2)}%</p>
+				<p><strong>High:</strong> {toolTipLabels.cand2High.toFixed(2)}%</p>
+				<p><strong>Low:</strong> {toolTipLabels.cand2Low.toFixed(2)}%</p>
+			</div>
+		</Tooltip>
+	{/if}
 </div>
 
 <style>
