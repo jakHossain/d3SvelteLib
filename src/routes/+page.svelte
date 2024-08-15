@@ -5,6 +5,7 @@
 	import { readCsv } from '../lib/utilities/CSVParsingUtil';
 	import PollChart from '../lib/components/charts/PollChart.svelte';
 	import { getMaxFromArray, getMinFromArray } from '../lib/utilities/ChartUtil';
+	import LineChartv2 from '../lib/components/charts/LineChartv2.svelte';
 
 	let data = [
 		{ x: 0, y: 4, label: 'A' },
@@ -32,9 +33,10 @@
 
 <main>
 	<!-- <LineChart margin={50} {data} /> -->
-	{#if predictionLineData}
+	<!-- {#if predictionLineData}
 		<PollChart data={predictionLineData.data} margin={50} />
-	{/if}
+	{/if} -->
+	<LineChartv2></LineChartv2>
 </main>
 
 <style>
