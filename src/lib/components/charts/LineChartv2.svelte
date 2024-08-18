@@ -1,9 +1,10 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import { initChartData } from '../../stores/ChartStore';
+	import { select, selectAll, line, min, max, axisBottom, axisLeft } from 'd3';
 	import SvgContainer from '../chartElements/SvgContainer.svelte';
 	import { generateLinearScales } from '../../utilities/ChartUtil';
-	import { select, selectAll, line, min, max, axisBottom, axisLeft } from 'd3';
+	import { initChartData } from '../../stores/ChartStore';
+	import { initializeToolTip } from '../charts/interaction/TooltipUtility.js';
 
 	export let chartData;
 	export let margin = 25;
@@ -12,6 +13,26 @@
 	export let maxY;
 	export let maxX;
 
+	//state variables
+	let chartState;
+	let tooltipState;
+	let tooltipDisplay = { label: '', x: '', y: '' };
+
+	const [subscribeChartState, chartStateDispatch] = initChartData();
+	const unsubscribeChartState = subscribeChartState((state) => {
+		chartState = state;
+	});
+
+	chartStateDispatch.setChartData(chartData);
+
+	const { enable, disable, subscribeTooltip } = initializeToolTip();
+
+	const unsubscribeTooltip = subscribeTooltip((state) => {
+		tooltipState = state;
+	});
+
+	//vhart variables
+	let svgContainer;
 	let xScale;
 	let yScale;
 	let linePath;
@@ -36,17 +57,7 @@
 		maxX = max(chartData, (d) => d.x);
 	}
 
-	const [subscribeChartState, chartStateDispatch] = initChartData();
-	let chartState;
-	const unsubscribeChartState = subscribeChartState((state) => {
-		chartState = state;
-	});
-
-	chartStateDispatch.setChartData(chartData);
-
 	const loadChart = () => {
-		const { chartContainer, svgContainer } = chartState;
-
 		({ xScale, yScale } = generateLinearScales(
 			chartState.data,
 			svgContainer,
@@ -87,8 +98,6 @@
 			.style('stroke-width', '2px')
 			.style('stroke', 'black');
 
-		console.log(linePath);
-
 		linePoints = select(svgContainer)
 			.select('.chartBody')
 			.append('g')
@@ -101,31 +110,103 @@
 			.attr('cy', function (d, i) {
 				return yScale(d.y);
 			})
-			.attr('r', 5)
+			.attr('r', 7)
+			.attr('transform', `translate(${margin}, ${margin})`);
+
+		//configure interactivity
+		linePoints
+			.on('mouseover', function (event, d) {
+				select(this).attr('stroke-width', '1px').attr('stroke', 'white');
+			})
+			.on('mousemove', function (event, d) {
+				const pointPos = event.target.getBoundingClientRect();
+				enable({ top: pointPos.top, left: pointPos.left });
+				tooltipDisplay.label = d.label;
+				tooltipDisplay.x = d.x;
+				tooltipDisplay.y = d.y;
+			})
+			.on('mouseout', function (event, d) {
+				disable();
+				select(this).attr('stroke-width', '0');
+			});
+	};
+
+	$: {
+		if (chartState?.svgContainer) {
+			svgContainer = chartState.svgContainer;
+		}
+	}
+
+	$: chartState?.svgContainer && chartState?.chartContainer && loadChart();
+
+	//resizing util funcs
+	const resizeAxis = () => {
+		({ xScale, yScale } = generateLinearScales(
+			chartState.data,
+			svgContainer,
+			minX,
+			maxX,
+			minY,
+			maxY,
+			margin
+		));
+
+		xAxis
+			.transition()
+			.call(axisBottom(xScale))
+			.attr(
+				'transform',
+				`translate(${margin}, ${svgContainer.getBoundingClientRect().height - margin})`
+			);
+		yAxis.transition().call(axisLeft(yScale)).attr('transform', `translate(${margin}, ${margin})`);
+	};
+
+	const resizePoints = () => {
+		linePoints
+			.transition()
+			.attr('cx', function (d, i) {
+				return xScale(d.x);
+			})
+			.attr('cy', function (d, i) {
+				return yScale(d.y);
+			})
 			.attr('transform', `translate(${margin}, ${margin})`);
 	};
 
-	$: chartState?.svgContainer && chartState?.chartContainer && loadChart();
+	const resizeLine = () => {
+		const lineData = line()
+			.x((d, i) => xScale(d.x))
+			.y((d, i) => yScale(d.y));
+
+		linePath.transition().attr('d', lineData);
+	};
+
+	const resizeFunc = () => {
+		resizeAxis();
+		resizePoints();
+		resizeLine();
+	};
 
 	onMount(() => {});
 
 	onDestroy(() => {
 		unsubscribeChartState();
+		unsubscribeTooltip();
 	});
 </script>
 
-<SvgContainer
-	{chartStateDispatch}
-	resizeFunc={() => {
-		console.log('Resize!!');
-	}}
->
+<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState}>
 	<span slot="chartTitle"
 		>Chart title: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>
 	<span slot="chartDeck"
 		>Chart deck: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>
+	<div slot="tooltipOutput">
+		<h5>{tooltipDisplay.label}</h5>
+		<p><strong>X:</strong> {tooltipDisplay.x}</p>
+		<p><strong>Y:</strong> {tooltipDisplay.y}</p>
+	</div>
 </SvgContainer>
 
 <button

@@ -1,9 +1,11 @@
 <script>
 	import { onDestroy, onMount } from 'svelte';
 	import { resizeDebounce } from '../../utilities/ChartUtil';
+	import Tooltip from '../charts/interaction/Tooltip.svelte';
 
 	export let chartStateDispatch;
 	export let resizeFunc;
+	export let tooltipState;
 
 	let chartContainerRef;
 	let svgRef;
@@ -39,6 +41,11 @@
 		<g class="x-axis axis"> </g>
 		<g class="y-axis axis"> </g>
 	</svg>
+	{#if svgRef}
+		<Tooltip {tooltipState} chartContainerRef={svgRef}>
+			<slot name="tooltipOutput"></slot>
+		</Tooltip>
+	{/if}
 </div>
 
 <style>

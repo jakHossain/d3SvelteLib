@@ -8,7 +8,7 @@ export const initializeToolTip = () => {
 	const { subscribe, set, update } = writable(initialState);
 
 	return {
-		subscribe,
+		subscribeTooltip: subscribe,
 		enable: (position) => {
 			update((state) => {
 				return { ...state, active: true, position };
