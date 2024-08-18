@@ -36,7 +36,7 @@
 	<!-- {#if predictionLineData}
 		<PollChart data={predictionLineData.data} margin={50} />
 	{/if} -->
-	<LineChartv2></LineChartv2>
+	<LineChartv2 chartData={data}></LineChartv2>
 </main>
 
 <style>

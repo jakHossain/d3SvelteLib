@@ -1,7 +1,8 @@
 import { select, max, min, scaleLinear, axisLeft, axisBottom, line } from 'd3';
 
 export const generateLinearXScale = (data, chartContainerRef, minVal, maxVal, margin) => {
-	const containerWidth = chartContainerRef.offsetWidth;
+	margin *= 2;
+	const containerWidth = chartContainerRef.getBoundingClientRect().width;
 
 	const xScale = scaleLinear()
 		.domain([minVal || min(data, (d) => d.x), maxVal || max(data, (d) => d.x)])
@@ -11,7 +12,8 @@ export const generateLinearXScale = (data, chartContainerRef, minVal, maxVal, ma
 };
 
 export const generateLinearYScale = (data, chartContainerRef, minVal, maxVal, margin) => {
-	const containerHeight = chartContainerRef.offsetHeight;
+	margin *= 2;
+	const containerHeight = chartContainerRef.getBoundingClientRect().height;
 
 	const yScale = scaleLinear()
 		.domain([minVal || min(data, (d) => d.y), maxVal || max(data, (d) => d.y)])
@@ -22,7 +24,7 @@ export const generateLinearYScale = (data, chartContainerRef, minVal, maxVal, ma
 
 export const generateLinearScales = (data, chartContainerRef, xMin, xMax, yMin, yMax, margin) => {
 	const xScale = generateLinearXScale(data, chartContainerRef, xMin, xMax, margin);
-	const yScale = generateLinearYScale(data, chartContainerRef, yMin, yMin, margin);
+	const yScale = generateLinearYScale(data, chartContainerRef, yMin, yMax, margin);
 
 	return { xScale, yScale };
 };
@@ -94,4 +96,15 @@ export const getMaxFromArray = (data) => {
 		const maximum = max(d.slice(1, d.length));
 		return maximum;
 	});
+};
+
+export const resizeDebounce = (resizeFunc, delay) => {
+	let timerId;
+
+	return () => {
+		clearTimeout(timerId);
+		timerId = setTimeout(() => {
+			resizeFunc();
+		}, delay);
+	};
 };

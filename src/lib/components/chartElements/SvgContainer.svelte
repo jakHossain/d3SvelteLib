@@ -1,7 +1,9 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { resizeDebounce } from '../../utilities/ChartUtil';
 
 	export let chartStateDispatch;
+	export let resizeFunc;
 
 	let chartContainerRef;
 	let svgRef;
@@ -10,7 +12,19 @@
 
 	$: chartContainerRef && chartStateDispatch.setChartContainer(chartContainerRef);
 
-	onMount(() => {});
+	const debouncedResizer = resizeDebounce(resizeFunc, 250);
+
+	onMount(() => {
+		if (typeof window != 'undefined') {
+			window.addEventListener('resize', debouncedResizer);
+		}
+	});
+
+	onDestroy(() => {
+		if (typeof window != 'undefined') {
+			window.removeEventListener('resize', debouncedResizer);
+		}
+	});
 </script>
 
 <div bind:this={chartContainerRef} class="chart-container">
@@ -21,7 +35,7 @@
 		<slot name="chartDeck"></slot>
 	</h5>
 	<svg bind:this={svgRef} class="svgBody">
-		<slot name="chartBody"></slot>
+		<g class="chartBody"></g>
 		<g class="x-axis axis"> </g>
 		<g class="y-axis axis"> </g>
 	</svg>
