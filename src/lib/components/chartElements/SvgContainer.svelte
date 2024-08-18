@@ -1,12 +1,16 @@
 <script>
 	import { onMount } from 'svelte';
 
-	export let chartContainerRef;
-	export let svgRef;
+	export let chartStateDispatch;
 
-	onMount(() => {
-		console.log('DAWD', svgRef);
-	});
+	let chartContainerRef;
+	let svgRef;
+
+	$: svgRef && chartStateDispatch.setSvgContainer(svgRef);
+
+	$: chartContainerRef && chartStateDispatch.setChartContainer(chartContainerRef);
+
+	onMount(() => {});
 </script>
 
 <div bind:this={chartContainerRef} class="chart-container">
@@ -18,12 +22,8 @@
 	</h5>
 	<svg bind:this={svgRef} class="svgBody">
 		<slot name="chartBody"></slot>
-		<g>
-			<slot name="x-axis"></slot>
-		</g>
-		<g>
-			<slot name="y-axis"></slot>
-		</g>
+		<g class="x-axis axis"> </g>
+		<g class="y-axis axis"> </g>
 	</svg>
 </div>
 
