@@ -32,7 +32,11 @@
 	onMount(async () => {
 		predictionLineData = await loadCsvData('../src/assets/poll_data.csv');
 		multLineSeriesData = await loadCsvData('../src/assets/multLineSeries.csv');
-		console.log(multLineSeriesData);
+
+		multLineSeriesData.data = multLineSeriesData.data.map((item) => {
+			const convData = new Date(item.date);
+			return { ...item, date: convData };
+		});
 	});
 </script>
 
@@ -41,7 +45,9 @@
 	<!-- {#if predictionLineData}
 		<PollChart data={predictionLineData.data} margin={50} />
 	{/if} -->
-	<LineChartv2 chartData={data}></LineChartv2>
+	{#if multLineSeriesData}
+		<LineChartv2 chartData={multLineSeriesData}></LineChartv2>
+	{/if}
 </main>
 
 <style>

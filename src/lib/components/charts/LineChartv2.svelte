@@ -2,7 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { select, selectAll, line, min, max, axisBottom, axisLeft } from 'd3';
 	import SvgContainer from '../chartElements/SvgContainer.svelte';
-	import { generateLinearScales } from '../../utilities/ChartUtil';
+	import { generateLinearScales, getMinMaxFromDataObject } from '../../utilities/ChartUtil';
 	import { initChartData } from '../../stores/ChartStore';
 	import { initializeToolTip } from '../charts/interaction/TooltipUtility.js';
 
@@ -40,22 +40,47 @@
 	let xAxis;
 	let yAxis;
 
+	console.log(chartData);
+
 	//min max values if not provided
-	if (!minY) {
-		minY = min(chartData, (d) => d.y);
+	if (!minY || !maxY) {
+		const { minVal, maxVal } = getMinMaxFromDataObject(
+			chartData.data,
+			chartData.fields.slice(1, chartData.fields.length)
+		);
+
+		if (!minY) minY = minVal;
+		if (!maxY) maxY = maxVal;
+
+		console.log(minY, maxY);
 	}
 
-	if (!minX) {
-		minX = min(chartData, (d) => d.x);
+	if (!minX || !maxX) {
+		const { minVal, maxVal } = getMinMaxFromDataObject(
+			chartData.data,
+			chartData.fields.slice(0, 1)
+		);
+
+		if (!minX) minX = minVal;
+		if (!maxX) maxX = maxVal;
+		console.log(minX, maxX);
 	}
 
-	if (!maxY) {
-		maxY = max(chartData, (d) => d.y);
-	}
+	// if (!minY) {
+	// 	minY = min(chartData, (d) => d.y);
+	// }
 
-	if (!maxX) {
-		maxX = max(chartData, (d) => d.x);
-	}
+	// if (!minX) {
+	// 	minX = min(chartData, (d) => d.x);
+	// }
+
+	// if (!maxY) {
+	// 	maxY = max(chartData, (d) => d.y);
+	// }
+
+	// if (!maxX) {
+	// 	maxX = max(chartData, (d) => d.x);
+	// }
 
 	const loadChart = () => {
 		({ xScale, yScale } = generateLinearScales(

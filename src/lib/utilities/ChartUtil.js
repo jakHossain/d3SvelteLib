@@ -1,4 +1,4 @@
-import { select, max, min, scaleLinear, axisLeft, axisBottom, line } from 'd3';
+import { select, max, min, scaleLinear, axisLeft, axisBottom, line, extent } from 'd3';
 
 export const generateLinearXScale = (data, chartContainerRef, minVal, maxVal, margin) => {
 	margin *= 2;
@@ -107,4 +107,12 @@ export const resizeDebounce = (resizeFunc, delay) => {
 			resizeFunc();
 		}, delay);
 	};
+};
+
+export const getMinMaxFromDataObject = (data, fields) => {
+	const flattenedData = data.flatMap((d) => fields.map((field) => d[field]));
+
+	const [minVal, maxVal] = extent(flattenedData);
+
+	return { minVal, maxVal };
 };
