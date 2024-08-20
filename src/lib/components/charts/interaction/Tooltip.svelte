@@ -34,10 +34,7 @@
 		updateToolTipPosition(tooltipState.position, chartContainerRef, toolTipRef);
 	}
 
-	onMount(() => {
-		console.log('TEST', chartContainerRef.getBoundingClientRect());
-		console.log('TooltipRef', toolTipRef.getBoundingClientRect());
-	});
+	onMount(() => {});
 </script>
 
 <div

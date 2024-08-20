@@ -1,32 +1,43 @@
-import { select, max, min, scaleLinear, axisLeft, axisBottom, line, extent } from 'd3';
+import { select, max, min, scaleLinear, scaleTime, axisLeft, axisBottom, line, extent } from 'd3';
 
-export const generateLinearXScale = (data, chartContainerRef, minVal, maxVal, margin) => {
+export const generateLinearXScale = (chartContainerRef, minVal, maxVal, margin) => {
+	//margin multiplied by 2 bc 50 margin is 50 margin on both sides
 	margin *= 2;
 	const containerWidth = chartContainerRef.getBoundingClientRect().width;
 
+	console.log('LOOK', minVal, maxVal);
+
 	const xScale = scaleLinear()
-		.domain([minVal || min(data, (d) => d.x), maxVal || max(data, (d) => d.x)])
+		.domain([minVal, maxVal])
 		.range([0, containerWidth - (margin || 0)]);
 
 	return xScale;
 };
 
-export const generateLinearYScale = (data, chartContainerRef, minVal, maxVal, margin) => {
+export const generateLinearYScale = (chartContainerRef, minVal, maxVal, margin) => {
+	//margin multiplied by 2 bc 50 margin is 50 margin on both sides
 	margin *= 2;
 	const containerHeight = chartContainerRef.getBoundingClientRect().height;
 
 	const yScale = scaleLinear()
-		.domain([minVal || min(data, (d) => d.y), maxVal || max(data, (d) => d.y)])
+		.domain([minVal, maxVal])
 		.range([containerHeight - (margin || 0), 0]);
 
 	return yScale;
 };
 
-export const generateLinearScales = (data, chartContainerRef, xMin, xMax, yMin, yMax, margin) => {
-	const xScale = generateLinearXScale(data, chartContainerRef, xMin, xMax, margin);
-	const yScale = generateLinearYScale(data, chartContainerRef, yMin, yMax, margin);
+export const generateLinearScales = (chartContainerRef, xMin, xMax, yMin, yMax, margin) => {
+	const xScale = generateLinearXScale(chartContainerRef, xMin, xMax, margin);
+	const yScale = generateLinearYScale(chartContainerRef, yMin, yMax, margin);
 
 	return { xScale, yScale };
+};
+
+export const generateXDateScale = (chartContainerRef, minVal, maxVal, margin) => {
+	const containerWidth = chartContainerRef.getBoundingClientRect().width;
+	const xDateScale = scaleTime([minVal, maxVal], [0, containerWidth - margin * 2]);
+
+	return xDateScale;
 };
 
 export const resizeScales = (
