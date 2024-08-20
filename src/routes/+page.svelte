@@ -7,6 +7,9 @@
 	import { getMaxFromArray, getMinFromArray } from '../lib/utilities/ChartUtil';
 	import LineChartv2 from '../lib/components/charts/LineChartv2.svelte';
 
+	let predictionLineData;
+	let multLineSeriesData;
+
 	let data = [
 		{ x: 0, y: 4, label: 'A' },
 		{ x: 10, y: 15, label: 'A' },
@@ -21,13 +24,15 @@
 		{ x: 100, y: 50, label: 'J' }
 	];
 
-	let predictionLineData;
-
-	const csvUrl = '../src/assets/poll_data.csv';
-	onMount(async () => {
+	const loadCsvData = async (csvUrl) => {
 		const csvData = await (await fetch(csvUrl)).text();
-		predictionLineData = await readCsv(csvData);
-		console.log(predictionLineData);
+		const data = await readCsv(csvData);
+		return data;
+	};
+	onMount(async () => {
+		predictionLineData = await loadCsvData('../src/assets/poll_data.csv');
+		multLineSeriesData = await loadCsvData('../src/assets/multLineSeries.csv');
+		console.log(multLineSeriesData);
 	});
 </script>
 

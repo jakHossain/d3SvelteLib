@@ -203,9 +203,9 @@
 		>Chart deck: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>
 	<div slot="tooltipOutput">
-		<h5>{tooltipDisplay.label}</h5>
-		<p><strong>X:</strong> {tooltipDisplay.x}</p>
-		<p><strong>Y:</strong> {tooltipDisplay.y}</p>
+		<h5 class="tooltip-label">{tooltipDisplay.label}</h5>
+		<p class="tooltip-body"><strong>X:</strong> {tooltipDisplay.x}</p>
+		<p class="tooltip-body"><strong>Y:</strong> {tooltipDisplay.y}</p>
 	</div>
 </SvgContainer>
 
@@ -215,3 +215,14 @@
 	}}
 	>asdsad
 </button>
+
+<style>
+	.tooltip-label {
+		margin: 0;
+		margin-bottom: 0.4em;
+	}
+
+	.tooltip-body {
+		margin: 0;
+	}
+</style>

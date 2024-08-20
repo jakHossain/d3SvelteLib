@@ -14,7 +14,7 @@
 
 	$: chartContainerRef && chartStateDispatch.setChartContainer(chartContainerRef);
 
-	const debouncedResizer = resizeDebounce(resizeFunc, 250);
+	const debouncedResizer = resizeDebounce(resizeFunc, 100);
 
 	onMount(() => {
 		if (typeof window != 'undefined') {
