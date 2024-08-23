@@ -1,165 +1,258 @@
 <script>
-	import { axisBottom, axisLeft, extent, line, max, scaleLinear, select } from 'd3';
 	import { onMount, onDestroy } from 'svelte';
+	import { select, selectAll, line, min, max, axisBottom, axisLeft, timeFormat } from 'd3';
+	import SvgContainer from '../chartElements/SvgContainer.svelte';
+	import { getMonthYear } from '../../utilities/DateTimeUtil';
 	import {
-		generateLinearScales,
-		resizeScales,
-		updatePointPosition,
-		updateLinePath
+		generateLinearYScale,
+		getMinMaxFromDataObject,
+		generateXDateScale
 	} from '../../utilities/ChartUtil';
+	import { initChartData } from '../../stores/ChartStore';
+	import { initializeToolTip } from '../charts/interaction/TooltipUtility.js';
 
-	import ToolTip from './interaction/Tooltip.svelte';
-	import { initializeToolTip } from './interaction/TooltipUtility';
+	export let chartData;
+	export let margin = 25;
+	export let minY;
+	export let minX;
+	export let maxY;
+	export let maxX;
 
-	export let data;
-	export let margin = 50;
-	export let xMin = 0;
-	export let xMax = null;
-	export let yMin = 0;
-	export let yMax = null;
-
-	let chartContainer;
-	let xAxis;
-	let yAxis;
-	let linePath;
-
-	let displayValue = { x: '', y: '', label: '' };
-
-	const { enable, disable, reset, subscribe } = initializeToolTip();
-
+	//state variables
+	let chartState;
 	let tooltipState;
+	let tooltipDisplay = { label: '', x: '', y: '' };
 
-	const unsubscribeTooltip = subscribe((state) => {
+	const [subscribeChartState, chartStateDispatch] = initChartData();
+	const unsubscribeChartState = subscribeChartState((state) => {
+		chartState = state;
+	});
+
+	chartStateDispatch.setChartData(chartData);
+
+	const { enable, disable, subscribeTooltip } = initializeToolTip();
+
+	const unsubscribeTooltip = subscribeTooltip((state) => {
 		tooltipState = state;
 	});
 
-	const loadChart = () => {
-		const svg = select(chartContainer).append('svg').attr('height', '100%').attr('width', '100%');
+	//chart structure variables
+	let svgContainer;
+	let xScale;
+	let yScale;
+	let xAxis;
+	let yAxis;
 
-		const { xScale, yScale } = generateLinearScales(
-			data,
-			chartContainer,
-			xMin,
-			xMax,
-			yMin,
-			yMax,
-			margin
+	//chart specific vars
+	let linePoints = {};
+	let linePaths = {};
+
+	//min max values if not provided
+	if (!minY || !maxY) {
+		const { minVal, maxVal } = getMinMaxFromDataObject(
+			chartData.data,
+			chartData.fields.slice(1, chartData.fields.length)
 		);
 
-		const yAxisScale = axisLeft(yScale);
-		const xAxisScale = axisBottom(xScale);
+		if (!minY) minY = minVal;
+		if (!maxY) maxY = maxVal;
+	}
 
-		const lineData = line()
-			.x((d, i) => xScale(d.x))
-			.y((d, i) => yScale(d.y));
-
-		//y-axis
-		yAxis = svg
-			.append('g')
-			.attr('class', 'y-axis axis')
-			.call(yAxisScale)
-			.attr('transform', `translate(${margin / 2}, ${margin / 2})`);
-
-		//x-axis
-		xAxis = svg
-			.append('g')
-			.attr('class', 'x-axis axis')
-			.call(xAxisScale)
-			.attr('transform', `translate(${margin / 2}, ${chartContainer.offsetHeight - margin / 2})`);
-
-		//line path
-		linePath = svg
-			.append('g')
-			.append('path')
-			.datum(data)
-			.attr('d', lineData)
-			.attr('transform', `translate(${margin / 2}, ${margin / 2})`)
-			.attr('class', 'line data-line')
-			.attr('fill', 'none')
-			.style('stroke-width', '2px')
-			.style('stroke', 'black');
-
-		//points
-
-		svg
-			.selectAll('circle')
-			.data(data)
-			.join('circle')
-			.attr('cx', (d, i) => {
-				return xScale(d.x) + margin / 2;
-			})
-			.attr('cy', (d, i) => {
-				return yScale(d.y) + margin / 2;
-			})
-			.attr('r', 6)
-			.on('mouseover', function (event, d) {
-				select(this).attr('stroke-width', '1px').attr('stroke', 'white');
-			})
-			.on('mousemove', function (event, d) {
-				const position = event.target.getBoundingClientRect();
-				const datum = select(this).datum();
-
-				enable({ top: position.top, left: position.left });
-
-				displayValue.x = datum.x;
-				displayValue.y = datum.y;
-				displayValue.label = datum.label;
-			})
-			.on('mouseout', function (event, d) {
-				select(this).attr('stroke-width', '0px').attr('stroke', 'black');
-
-				disable();
-			});
-	};
-
-	const updateChartResizeController = () => {
-		const { xScale, yScale } = resizeScales(
-			data,
-			chartContainer,
-			xAxis,
-			yAxis,
-			xMin,
-			xMax,
-			yMin,
-			yMax,
-			margin
+	if (!minX || !maxX) {
+		const { minVal, maxVal } = getMinMaxFromDataObject(
+			chartData.data,
+			chartData.fields.slice(0, 1)
 		);
-		updatePointPosition(data, chartContainer, xScale, yScale, margin);
-		updateLinePath(chartContainer, xScale, yScale, margin);
-	};
 
-	onMount(() => {
-		loadChart();
-		if (typeof window !== 'undefined') {
-			window.addEventListener('resize', updateChartResizeController);
+		if (!minX) minX = minVal;
+		if (!maxX) maxX = maxVal;
+	}
+
+	// if (!minY) {
+	// 	minY = min(chartData, (d) => d.y);
+	// }
+
+	// if (!minX) {
+	// 	minX = min(chartData, (d) => d.x);
+	// }
+
+	// if (!maxY) {
+	// 	maxY = max(chartData, (d) => d.y);
+	// }
+
+	// if (!maxX) {
+	// 	maxX = max(chartData, (d) => d.x);
+	// }
+
+	const drawLines = () => {
+		//copy fields to prevent overwriting state
+		const fields = [...chartState.data.fields];
+		const xField = fields.shift();
+
+		for (let yField of fields) {
+			//draww line path
+			const lineData = line()
+				.x((d, i) => xScale(d[xField]))
+				.y((d, i) => yScale(d[yField]));
+
+			const linePath = select(svgContainer)
+				.select('.chartBody')
+				.append('g')
+				.append('path')
+				.datum(chartState.data.data)
+				.attr('d', lineData)
+				.attr('transform', `translate(${margin}, ${margin})`)
+				.attr('fill', 'none')
+				.style('stroke-width', '2px')
+				.style('stroke', 'black');
+
+			const points = select(svgContainer)
+				.select('.chartBody')
+				.append('g')
+				.selectAll('circle')
+				.data(chartState.data.data)
+				.join('circle')
+				.attr('cx', function (d, i) {
+					return xScale(d[xField]);
+				})
+				.attr('cy', function (d, i) {
+					return yScale(d[yField]);
+				})
+				.attr('r', 5)
+				.attr('transform', `translate(${margin}, ${margin})`);
+
+			//configure interactivity
+			points
+				.on('mouseover', function (event, d) {
+					select(this).attr('stroke-width', '1px').attr('stroke', 'white');
+				})
+				.on('mousemove', function (event, d) {
+					const pointPos = event.target.getBoundingClientRect();
+					enable({ top: pointPos.top, left: pointPos.left });
+					const xDateValues = getMonthYear(d[xField]);
+					tooltipDisplay.label = yField;
+					tooltipDisplay.x = xDateValues;
+					tooltipDisplay.y = d[yField];
+				})
+				.on('mouseout', function (event, d) {
+					disable();
+					select(this).attr('stroke-width', '0');
+				});
+
+			linePaths[yField] = linePath;
+			linePoints[yField] = points;
 		}
-	});
+	};
+
+	const loadChart = () => {
+		yScale = generateLinearYScale(svgContainer, minY, maxY, margin);
+		xScale = generateXDateScale(svgContainer, minX, maxX, margin);
+
+		//draw axis
+		xAxis = select(svgContainer)
+			.select('.x-axis')
+			.call(axisBottom(xScale))
+			.attr(
+				'transform',
+				`translate(${margin}, ${svgContainer.getBoundingClientRect().height - margin})`
+			);
+
+		yAxis = select(svgContainer)
+			.select('.y-axis')
+			.call(axisLeft(yScale))
+			.attr('transform', `translate(${margin}, ${margin})`);
+
+		drawLines();
+	};
+
+	//resizing util funcs
+	const resizeAxis = () => {
+		yScale = generateLinearYScale(svgContainer, minY, maxY, margin);
+		xScale = generateXDateScale(svgContainer, minX, maxX, margin);
+
+		xAxis
+			.transition()
+			.call(axisBottom(xScale))
+			.attr(
+				'transform',
+				`translate(${margin}, ${svgContainer.getBoundingClientRect().height - margin})`
+			);
+		yAxis.transition().call(axisLeft(yScale)).attr('transform', `translate(${margin}, ${margin})`);
+	};
+
+	const resizePoints = () => {
+		const fields = [...chartState.data.fields];
+		const xField = fields.shift();
+
+		for (let yField of fields) {
+			linePoints[yField]
+				.transition()
+				.attr('cx', function (d, i) {
+					return xScale(d[xField]);
+				})
+				.attr('cy', function (d, i) {
+					return yScale(d[yField]);
+				})
+				.attr('transform', `translate(${margin}, ${margin})`);
+		}
+	};
+
+	const resizeLine = () => {
+		const fields = [...chartState.data.fields];
+		const xField = fields.shift();
+
+		for (let lineKey of fields) {
+			const lineData = line()
+				.x((d, i) => xScale(d[xField]))
+				.y((d, i) => yScale(d[lineKey]));
+
+			linePaths[lineKey].transition().attr('d', lineData);
+		}
+	};
+
+	const resizeFunc = () => {
+		resizeAxis();
+		resizePoints();
+		resizeLine();
+	};
+
+	onMount(() => {});
 
 	onDestroy(() => {
+		unsubscribeChartState();
 		unsubscribeTooltip();
-		if (typeof window !== 'undefined') {
-			window.removeEventListener('resize', updateChartResizeController);
-		}
 	});
+
+	$: {
+		if (chartState?.svgContainer) {
+			svgContainer = chartState.svgContainer;
+		}
+	}
+
+	$: chartState?.svgContainer && chartState?.chartContainer && loadChart();
 </script>
 
-<div class="chart-container" bind:this={chartContainer}>
-	{#if chartContainer}
-		<ToolTip {tooltipState} chartContainerRef={chartContainer}>
-			<p class="labelText"><strong>{displayValue.label}</strong></p>
-			<p class="labelText"><strong>X:</strong> {displayValue.x}</p>
-			<p class="labelText"><strong>Y:</strong> {displayValue.x}</p>
-		</ToolTip>
-	{/if}
-</div>
+<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState}>
+	<span slot="chartTitle"
+		>Chart title: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
+	>
+	<span slot="chartDeck"
+		>Chart deck: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
+	>
+	<div slot="tooltipOutput">
+		<h5 class="tooltip-label">{tooltipDisplay.label}</h5>
+		<p class="tooltip-body"><strong>X:</strong> {tooltipDisplay.x}</p>
+		<p class="tooltip-body"><strong>Y:</strong> {tooltipDisplay.y}</p>
+	</div>
+</SvgContainer>
 
 <style>
-	.chart-container {
-		height: 100%;
-		width: 100%;
-		background-color: aquamarine;
+	.tooltip-label {
+		margin: 0;
+		margin-bottom: 0.4em;
 	}
-	.labelText {
+
+	.tooltip-body {
 		margin: 0;
 	}
 </style>

@@ -5,10 +5,11 @@
 	import { readCsv } from '../lib/utilities/CSVParsingUtil';
 	import PollChart from '../lib/components/charts/PollChart.svelte';
 	import { getMaxFromArray, getMinFromArray } from '../lib/utilities/ChartUtil';
-	import LineChartv2 from '../lib/components/charts/LineChartv2.svelte';
+	import { groups } from 'd3';
 
 	let predictionLineData;
 	let multLineSeriesData;
+	let candidate_data;
 
 	let data = [
 		{ x: 0, y: 4, label: 'A' },
@@ -27,6 +28,7 @@
 	const loadCsvData = async (csvUrl) => {
 		const csvData = await (await fetch(csvUrl)).text();
 		const data = await readCsv(csvData);
+
 		return data;
 	};
 	onMount(async () => {
@@ -37,6 +39,8 @@
 			const convData = new Date(item.date);
 			return { ...item, date: convData };
 		});
+
+		candidate_data = await loadCsvData('../src/assets/candidate_data.csv');
 	});
 </script>
 
@@ -46,19 +50,22 @@
 		<PollChart data={predictionLineData.data} margin={50} />
 	{/if} -->
 	{#if multLineSeriesData}
-		<LineChartv2 chartData={multLineSeriesData}></LineChartv2>
+		<LineChart chartData={multLineSeriesData}></LineChart>
+	{/if}
+	{#if candidate_data}
+		<PollChart chartData={candidate_data}></PollChart>
 	{/if}
 </main>
 
 <style>
 	main {
 		width: 50vw;
-		height: 60vh;
+		height: 100vh;
 		margin: auto;
 		min-width: 500px;
 		min-height: 250px;
 		display: grid;
-		grid-template-rows: 1fr 1fr;
+		grid-template-rows: 1fr 1fr 1fr;
 		gap: 2rem;
 	}
 </style>
