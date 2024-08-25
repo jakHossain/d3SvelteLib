@@ -52,9 +52,9 @@
 	{#if multLineSeriesData}
 		<LineChart chartData={multLineSeriesData}></LineChart>
 	{/if}
-	{#if candidate_data}
+	<!-- {#if candidate_data}
 		<PollChart chartData={candidate_data}></PollChart>
-	{/if}
+	{/if} -->
 </main>
 
 <style>
@@ -65,7 +65,7 @@
 		min-width: 500px;
 		min-height: 250px;
 		display: grid;
-		grid-template-rows: 1fr 1fr 1fr;
+		grid-template-rows: 1fr 1fr;
 		gap: 2rem;
 	}
 </style>

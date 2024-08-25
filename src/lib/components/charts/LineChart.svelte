@@ -232,7 +232,7 @@
 	$: chartState?.svgContainer && chartState?.chartContainer && loadChart();
 </script>
 
-<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState}>
+<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState} {margin}>
 	<span slot="chartTitle"
 		>Chart title: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>

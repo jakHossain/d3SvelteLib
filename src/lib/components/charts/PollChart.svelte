@@ -1,6 +1,18 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import { select, selectAll, group, line, min, max, axisBottom, axisLeft, timeFormat } from 'd3';
+	import {
+		select,
+		selectAll,
+		group,
+		line,
+		area,
+		min,
+		max,
+		axisBottom,
+		axisLeft,
+		timeFormat
+	} from 'd3';
+
 	import SvgContainer from '../chartElements/SvgContainer.svelte';
 	import { getMonthYear } from '../../utilities/DateTimeUtil';
 	import {
@@ -10,6 +22,7 @@
 	} from '../../utilities/ChartUtil';
 	import { initChartData } from '../../stores/ChartStore';
 	import { initializeToolTip } from '../charts/interaction/TooltipUtility.js';
+	import { defaultColors } from '../../utilities/ChartStyleData';
 
 	export let chartData;
 	export let margin = 25;
@@ -85,9 +98,74 @@
 	let yScale;
 	let xAxis;
 	let yAxis;
+	let linePaths = {};
+	let areas = {};
+
+	const drawAreas = (candidateData, candidate, index) => {
+		const lowData = candidateData.Low;
+		const highData = candidateData.High;
+
+		console.log('YO', lowData, highData);
+
+		const areaData = area()
+			.x((d, i) => xScale(lowData[i].Date))
+			.y0((d, i) => yScale(lowData[i].Value))
+			.y1((d, i) => yScale(highData[i].Value));
+
+		select(svgContainer)
+			.select('.chartBody')
+			.append('g')
+			.append('path')
+			.datum(lowData)
+			.attr('d', areaData)
+			.attr('transform', `translate(${margin}, ${margin})`)
+			.attr('fill', defaultColors[index])
+			.attr('opacity', 0.2);
+	};
+	const drawLines = (candidateData, candidate, index) => {
+		const lineData = line()
+			.x((d, i) => xScale(d.Date))
+			.y((d, i) => yScale(d.Value));
+
+		linePaths[candidate] = select(svgContainer)
+			.select('.chartBody')
+			.append('g')
+			.append('path')
+			.datum(candidateData)
+			.attr('d', lineData)
+			.attr('fill', 'none')
+			.attr('stroke-width', '2px')
+			.attr('stroke', `${defaultColors[index]}`)
+			.attr('transform', `translate(${margin}, ${margin})`);
+	};
 
 	const loadChart = () => {
 		console.log('loading chart...');
+
+		const data = chartState.data.data;
+
+		xScale = generateXDateScale(svgContainer, minX, maxX, margin);
+		yScale = generateLinearYScale(svgContainer, minY, maxY, margin);
+
+		//draw axis
+		xAxis = select(svgContainer)
+			.select('.x-axis')
+			.call(axisBottom(xScale))
+			.attr(
+				'transform',
+				`translate(${margin}, ${svgContainer.getBoundingClientRect().height - margin})`
+			);
+
+		yAxis = select(svgContainer)
+			.select('.y-axis')
+			.call(axisLeft(yScale))
+			.attr('transform', `translate(${margin}, ${margin})`);
+
+		Object.keys(data).forEach((candidate, index) => {
+			const candidateData = data[candidate];
+			drawAreas(candidateData, candidate, index);
+			drawLines(candidateData.Estimate, candidate, index);
+		});
 	};
 
 	const resizeFunc = () => {};
@@ -98,10 +176,10 @@
 		}
 	}
 
-	$: chartState?.svgContainer && chartState?.chartContainer && chartState?.data && loadChart();
+	$: svgContainer && chartState?.chartContainer && chartState?.data && loadChart();
 </script>
 
-<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState}>
+<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState} {margin}>
 	<span slot="chartTitle"
 		>Poll Chart: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>

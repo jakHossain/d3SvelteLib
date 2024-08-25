@@ -2,13 +2,16 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { resizeDebounce } from '../../utilities/ChartUtil';
 	import Tooltip from '../charts/interaction/Tooltip.svelte';
+	import InteractionWindow from '../charts/interaction/InteractionWindow.svelte';
 
 	export let chartStateDispatch;
 	export let resizeFunc;
 	export let tooltipState;
+	export let margin;
 
 	let chartContainerRef;
 	let svgRef;
+	let svgDivContainer;
 
 	$: svgRef && chartStateDispatch.setSvgContainer(svgRef);
 
@@ -36,16 +39,21 @@
 	<h5 class="chart-deck">
 		<slot name="chartDeck"></slot>
 	</h5>
-	<svg bind:this={svgRef} class="svgBody">
-		<g class="chartBody"></g>
-		<g class="x-axis axis"> </g>
-		<g class="y-axis axis"> </g>
-	</svg>
-	{#if svgRef}
-		<Tooltip {tooltipState} chartContainerRef={svgRef}>
-			<slot name="tooltipOutput"></slot>
-		</Tooltip>
-	{/if}
+	<div class="svg-container" bind:this={svgDivContainer}>
+		<svg bind:this={svgRef} class="svg-body">
+			<g class="chartBody"></g>
+			<g class="x-axis axis"> </g>
+			<g class="y-axis axis"> </g>
+		</svg>
+		{#if svgRef}
+			<Tooltip {tooltipState} chartContainerRef={svgRef}>
+				<slot name="tooltipOutput"></slot>
+			</Tooltip>
+		{/if}
+		{#if svgDivContainer}
+			<InteractionWindow {margin} {svgDivContainer} />
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -54,6 +62,7 @@
 		width: 100%;
 		display: flex;
 		flex-direction: column;
+		position: relative;
 	}
 	.chart-title {
 		font-weight: 700;
@@ -67,8 +76,13 @@
 		margin: 10px 0;
 	}
 
-	.svgBody {
-		flex-grow: 1;
+	.svg-container {
 		width: 100%;
+		flex-grow: 1;
+		position: relative;
+	}
+	.svg-body {
+		width: 100%;
+		height: 100%;
 	}
 </style>
