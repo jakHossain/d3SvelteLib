@@ -82,7 +82,7 @@
 			candidates: Object.keys(cleanedChartData)
 		});
 
-		console.log(chartState.data);
+		console.log('initial setup', chartState.data);
 	};
 	processCsvData();
 
@@ -112,7 +112,7 @@
 			.y0((d, i) => yScale(lowData[i].Value))
 			.y1((d, i) => yScale(highData[i].Value));
 
-		select(svgContainer)
+		areas[candidate] = select(svgContainer)
 			.select('.chartBody')
 			.append('g')
 			.append('path')
@@ -144,6 +144,8 @@
 
 		const data = chartState.data.data;
 
+		console.log('WTD this', data);
+
 		xScale = generateXDateScale(svgContainer, minX, maxX, margin);
 		yScale = generateLinearYScale(svgContainer, minY, maxY, margin);
 
@@ -168,7 +170,48 @@
 		});
 	};
 
-	const resizeFunc = () => {};
+	const resizeAxis = () => {
+		yScale = generateLinearYScale(svgContainer, minY, maxY, margin);
+		xScale = generateXDateScale(svgContainer, minX, maxX, margin);
+
+		xAxis
+			.transition()
+			.call(axisBottom(xScale))
+			.attr(
+				'transform',
+				`translate(${margin}, ${svgContainer.getBoundingClientRect().height - margin})`
+			);
+		yAxis.transition().call(axisLeft(yScale)).attr('transform', `translate(${margin}, ${margin})`);
+	};
+
+	const resizeLineAndAreaPaths = () => {
+		const updateLineData = line()
+			.x((d, i) => xScale(d.Date))
+			.y((d, i) => yScale(d.Value));
+
+		for (let candidate in linePaths) {
+			linePaths[candidate].transition().attr('d', updateLineData);
+		}
+
+		Object.keys(chartState.data.data).forEach((candidate, index) => {
+			const candidateData = chartState.data.data[candidate];
+
+			const lowData = candidateData.Low;
+			const highData = candidateData.High;
+
+			const updatedAreaData = area()
+				.x((d, i) => xScale(lowData[i].Date))
+				.y0((d, i) => yScale(lowData[i].Value))
+				.y1((d, i) => yScale(highData[i].Value));
+
+			areas[candidate].transition().attr('d', updatedAreaData);
+		});
+	};
+
+	const resizeFunc = () => {
+		resizeAxis();
+		resizeLineAndAreaPaths();
+	};
 
 	$: {
 		if (chartState?.svgContainer) {

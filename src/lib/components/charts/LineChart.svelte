@@ -1,6 +1,17 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import { select, selectAll, line, min, max, axisBottom, axisLeft, timeFormat } from 'd3';
+	import {
+		select,
+		selectAll,
+		line,
+		min,
+		max,
+		axisBottom,
+		axisLeft,
+		timeFormat,
+		bisector,
+		reverse
+	} from 'd3';
 	import SvgContainer from '../chartElements/SvgContainer.svelte';
 	import { getMonthYear } from '../../utilities/DateTimeUtil';
 	import {
@@ -232,7 +243,16 @@
 	$: chartState?.svgContainer && chartState?.chartContainer && loadChart();
 </script>
 
-<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState} {margin}>
+<SvgContainer
+	{chartStateDispatch}
+	{resizeFunc}
+	{tooltipState}
+	{margin}
+	onIWHover={(xMousePos) => {
+		const invertedPos = xScale.invert(xMousePos);
+		const dataIndex = bisector((d) => d.date || d.Date).center(chartData.data, invertedPos);
+	}}
+>
 	<span slot="chartTitle"
 		>Chart title: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>

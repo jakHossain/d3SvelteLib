@@ -2,6 +2,7 @@
 	export let svgDivContainer;
 	export let margin;
 	export let vTooltip = true;
+	export let onIWHover;
 
 	let interactionWindowRef;
 	let vTooltipRef;
@@ -16,8 +17,8 @@
 	on:mousemove={(event) => {
 		if (event.target == interactionWindowRef) {
 			vTooltipRef.style.display = 'inline-block';
-			console.log(event);
 			vTooltipRef.style.left = event.layerX + 'px';
+			onIWHover(event.layerX);
 		}
 	}}
 	on:mouseleave={() => {
@@ -35,16 +36,15 @@
 		left: 0;
 		top: 0;
 		background-color: greenyellow;
-		z-index: 1;
 	}
 	.vertical-tooltip {
 		display: none;
 		box-sizing: border-box;
 		height: 100%;
-		width: 2px;
+		width: 1px;
 		position: absolute;
 		left: 200px;
-		border-right: solid 2px black;
+		border-right: solid 1px black;
 		z-index: -1;
 	}
 </style>

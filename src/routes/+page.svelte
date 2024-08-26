@@ -49,12 +49,12 @@
 	<!-- {#if predictionLineData}
 		<PollChart data={predictionLineData.data} margin={50} />
 	{/if} -->
-	{#if multLineSeriesData}
+	<!-- {#if multLineSeriesData}
 		<LineChart chartData={multLineSeriesData}></LineChart>
-	{/if}
-	<!-- {#if candidate_data}
-		<PollChart chartData={candidate_data}></PollChart>
 	{/if} -->
+	{#if candidate_data}
+		<PollChart chartData={candidate_data}></PollChart>
+	{/if}
 </main>
 
 <style>
