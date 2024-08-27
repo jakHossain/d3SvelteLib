@@ -36,3 +36,13 @@ export const getMonthYear = (date, abbreviate = false) => {
 	}
 	return fullMonthArr[month] + ' ' + year;
 };
+
+export const getMonthDayYear = (date, abbreviate = false) => {
+	console.log(date);
+	const [month, day, year] = [date.getMonth(), date.getDate(), date.getFullYear()];
+
+	if (abbreviate) {
+		return `${fullMonthArrAbbreviated[month]} ${day}, ${year}`;
+	}
+	return `${fullMonthArr[month]} ${day}, ${year}`;
+};

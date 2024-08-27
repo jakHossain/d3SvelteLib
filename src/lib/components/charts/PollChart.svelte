@@ -8,17 +8,19 @@
 		area,
 		min,
 		max,
+		bisector,
 		axisBottom,
 		axisLeft,
 		timeFormat
 	} from 'd3';
 
 	import SvgContainer from '../chartElements/SvgContainer.svelte';
-	import { getMonthYear } from '../../utilities/DateTimeUtil';
+	import { getMonthDayYear } from '../../utilities/DateTimeUtil';
 	import {
 		generateLinearYScale,
 		getMinMaxFromDataObject,
-		generateXDateScale
+		generateXDateScale,
+		resizeDebounce
 	} from '../../utilities/ChartUtil';
 	import { initChartData } from '../../stores/ChartStore';
 	import { initializeToolTip } from '../charts/interaction/TooltipUtility.js';
@@ -219,10 +221,39 @@
 		}
 	}
 
+	resizeDebounce(() => {});
+
+	const onIWHover = (mouseEvent) => {
+		const positionRelSvg = mouseEvent.layerX;
+		const firstCandidate = chartState.data.candidates[0];
+
+		const dataIndex = bisector((d) => d.Date).center(
+			chartState.data.data[firstCandidate].Estimate,
+			xScale.invert(positionRelSvg)
+		);
+
+		const formattedData = getMonthDayYear(xScale.invert(positionRelSvg));
+		tooltipDisplay = { Date: formattedData };
+
+		for (let candidate of chartState.data.candidates) {
+			const estimate = chartState.data.data[candidate].Estimate[dataIndex].Value;
+			const low = chartState.data.data[candidate].Low[dataIndex].Value;
+			const high = chartState.data.data[candidate].Estimate[dataIndex].Value;
+
+			tooltipDisplay[candidate] = { high, low, estimate };
+		}
+
+		enable({ top: mouseEvent.clientY, left: mouseEvent.clientX });
+	};
+
+	const onIWExit = () => {
+		disable();
+	};
+
 	$: svgContainer && chartState?.chartContainer && chartState?.data && loadChart();
 </script>
 
-<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState} {margin}>
+<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState} {margin} {onIWHover} {onIWExit}>
 	<span slot="chartTitle"
 		>Poll Chart: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>
@@ -230,8 +261,35 @@
 		>Chart deck: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>
 	<div slot="tooltipOutput">
-		<h5 class="tooltip-label">{tooltipDisplay.label}</h5>
-		<p class="tooltip-body"><strong>X:</strong> {tooltipDisplay.x}</p>
-		<p class="tooltip-body"><strong>Y:</strong> {tooltipDisplay.y}</p>
+		<h5 class="tooltip-label">{tooltipDisplay.Date}</h5>
+		{#each chartState.data.candidates as candidate}
+			<p class="tooltip-body">
+				<strong>
+					{candidate}:
+				</strong>
+			</p>
+			<p>
+				Est: {tooltipDisplay[candidate]?.estimate} | H: {tooltipDisplay[candidate]?.high} | L: {tooltipDisplay[
+					candidate
+				]?.low}
+			</p>
+		{/each}
 	</div>
 </SvgContainer>
+
+<style>
+	.tooltip-label {
+		margin: 0.5em 0;
+		font-size: 1.2rem;
+	}
+
+	.tooltip-body {
+		font-size: 1rem;
+		margin: 0;
+	}
+
+	.tooltip-body strong {
+		font-size: 1rem;
+		margin: 0;
+	}
+</style>

@@ -9,6 +9,7 @@
 	export let tooltipState;
 	export let margin;
 	export let onIWHover;
+	export let onIWExit;
 
 	let chartContainerRef;
 	let svgRef;
@@ -51,9 +52,9 @@
 				<slot name="tooltipOutput"></slot>
 			</Tooltip>
 		{/if}
-		<!-- {#if svgDivContainer}
-			<InteractionWindow {margin} {svgDivContainer} {onIWHover} />
-		{/if} -->
+		{#if svgDivContainer}
+			<InteractionWindow {margin} {svgDivContainer} {onIWHover} {onIWExit} />
+		{/if}
 	</div>
 </div>
 

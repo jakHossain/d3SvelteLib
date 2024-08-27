@@ -3,6 +3,7 @@
 	export let margin;
 	export let vTooltip = true;
 	export let onIWHover;
+	export let onIWExit;
 
 	let interactionWindowRef;
 	let vTooltipRef;
@@ -18,11 +19,12 @@
 		if (event.target == interactionWindowRef) {
 			vTooltipRef.style.display = 'inline-block';
 			vTooltipRef.style.left = event.layerX + 'px';
-			onIWHover(event.layerX);
+			onIWHover(event);
 		}
 	}}
 	on:mouseleave={() => {
 		vTooltipRef.style.display = 'none';
+		onIWExit();
 	}}
 >
 	{#if vTooltip}
@@ -35,7 +37,6 @@
 		position: absolute;
 		left: 0;
 		top: 0;
-		background-color: greenyellow;
 	}
 	.vertical-tooltip {
 		display: none;
