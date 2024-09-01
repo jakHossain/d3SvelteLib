@@ -6,6 +6,7 @@
 		group,
 		line,
 		area,
+		scaleLinear,
 		min,
 		max,
 		bisector,
@@ -98,6 +99,7 @@
 	let svgContainer;
 	let xScale;
 	let yScale;
+	let interpolatedYScale;
 	let xAxis;
 	let yAxis;
 	let linePaths = {};
@@ -136,17 +138,13 @@
 			.datum(candidateData)
 			.attr('d', lineData)
 			.attr('fill', 'none')
-			.attr('stroke-width', '2px')
+			.attr('stroke-width', '3px')
 			.attr('stroke', `${defaultColors[index]}`)
 			.attr('transform', `translate(${margin}, ${margin})`);
 	};
 
 	const loadChart = () => {
-		console.log('loading chart...');
-
 		const data = chartState.data.data;
-
-		console.log('WTD this', data);
 
 		xScale = generateXDateScale(svgContainer, minX, maxX, margin);
 		yScale = generateLinearYScale(svgContainer, minY, maxY, margin);
@@ -221,15 +219,73 @@
 		}
 	}
 
-	resizeDebounce(() => {});
+	const togglePathsOpacity = (opacity = 1) => {
+		for (let path in linePaths) {
+			linePaths[path].attr('opacity', opacity);
+		}
+	};
+
+	const drawActivePaths = (dataIndex, invertedDate) => {
+		togglePathsOpacity(0.6);
+		selectAll('.active-line-paths').remove();
+
+		let colorIndex = 0;
+		for (let candidate of chartState.data.candidates) {
+			const candidateData = chartState.data.data[candidate].Estimate.slice(0, dataIndex + 1);
+
+			if (dataIndex + 1 < chartState.data.data[candidate].Estimate.length) {
+				let interpolatedYScale = scaleLinear()
+					.domain(chartState.data.data[candidate].Estimate.map((d) => d.Date))
+					.range(chartState.data.data[candidate].Estimate.map((d) => d.Value));
+
+				let interpolatedYVal = interpolatedYScale(invertedDate);
+
+				if (candidateData[candidateData.length - 1].Date > invertedDate) {
+					candidateData.pop();
+				}
+
+				candidateData.push({
+					Date: invertedDate,
+					Candidate: candidate,
+					Type: 'Estimate',
+					Value: interpolatedYVal
+				});
+			}
+			const lineData = line()
+				.x((d, i) => xScale(d.Date))
+				.y((d, i) => yScale(d.Value));
+
+			select(svgContainer)
+				.select('.chartBody')
+				.append('g')
+				.append('path')
+				.datum(candidateData)
+				.attr('d', lineData)
+				.attr('fill', 'none')
+				.attr('stroke-width', '4px')
+				.attr('stroke', `${defaultColors[colorIndex]}`)
+				.attr('transform', `translate(${margin}, ${margin})`)
+				.attr('class', 'active-line-paths');
+			++colorIndex;
+		}
+
+		// console.log(invDate);
+		// const testData = chartState.data.data['Candidate A'].Estimate[15];
+		// interpolatedYScale = scaleLinear()
+		// 	.domain(chartState.data.data['Candidate A'].Estimate.map((d) => d.Date))
+		// 	.range(chartState.data.data['Candidate A'].Estimate.map((d) => d.Value));
+		// console.log(testData);
+		// console.log(interpolatedYScale(invDate));
+	};
 
 	const onIWHover = (mouseEvent) => {
 		const positionRelSvg = mouseEvent.layerX;
 		const firstCandidate = chartState.data.candidates[0];
+		const invertedData = xScale.invert(positionRelSvg);
 
 		const dataIndex = bisector((d) => d.Date).center(
 			chartState.data.data[firstCandidate].Estimate,
-			xScale.invert(positionRelSvg)
+			invertedData
 		);
 
 		const formattedData = getMonthDayYear(xScale.invert(positionRelSvg));
@@ -243,11 +299,14 @@
 			tooltipDisplay[candidate] = { high, low, estimate };
 		}
 
+		drawActivePaths(dataIndex, invertedData);
 		enable({ top: mouseEvent.clientY, left: mouseEvent.clientX });
 	};
 
 	const onIWExit = () => {
 		disable();
+		togglePathsOpacity(1);
+		selectAll('.active-line-paths').remove();
 	};
 
 	$: svgContainer && chartState?.chartContainer && chartState?.data && loadChart();
