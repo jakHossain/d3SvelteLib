@@ -312,7 +312,7 @@
 	$: svgContainer && chartState?.chartContainer && chartState?.data && loadChart();
 </script>
 
-<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState} {margin} {onIWHover} {onIWExit}>
+<SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState} {margin} IW {onIWHover} {onIWExit}>
 	<span slot="chartTitle"
 		>Poll Chart: lorem ipsum dolor sit amet consectetur adipisicing elit ipsa error natus</span
 	>

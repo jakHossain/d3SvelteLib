@@ -8,6 +8,7 @@
 	export let resizeFunc;
 	export let tooltipState;
 	export let margin;
+	export let IW = false;
 	export let onIWHover;
 	export let onIWExit;
 
@@ -52,7 +53,7 @@
 				<slot name="tooltipOutput"></slot>
 			</Tooltip>
 		{/if}
-		{#if svgDivContainer}
+		{#if IW && svgDivContainer}
 			<InteractionWindow {margin} {svgDivContainer} {onIWHover} {onIWExit} />
 		{/if}
 	</div>
