@@ -226,7 +226,7 @@
 	};
 
 	const drawActivePaths = (dataIndex, invertedDate) => {
-		togglePathsOpacity(0.6);
+		togglePathsOpacity(0.4);
 		selectAll('.active-line-paths').remove();
 
 		let colorIndex = 0;
@@ -262,7 +262,7 @@
 				.datum(candidateData)
 				.attr('d', lineData)
 				.attr('fill', 'none')
-				.attr('stroke-width', '4px')
+				.attr('stroke-width', '5px')
 				.attr('stroke', `${defaultColors[colorIndex]}`)
 				.attr('transform', `translate(${margin}, ${margin})`)
 				.attr('class', 'active-line-paths');
@@ -279,7 +279,7 @@
 	};
 
 	const onIWHover = (mouseEvent) => {
-		const positionRelSvg = mouseEvent.layerX;
+		const positionRelSvg = mouseEvent.offsetX;
 		const firstCandidate = chartState.data.candidates[0];
 		const invertedData = xScale.invert(positionRelSvg);
 

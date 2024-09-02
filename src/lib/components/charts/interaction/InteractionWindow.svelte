@@ -18,7 +18,7 @@
 	on:mousemove={(event) => {
 		if (event.target == interactionWindowRef) {
 			vTooltipRef.style.display = 'inline-block';
-			vTooltipRef.style.left = event.layerX + 'px';
+			vTooltipRef.style.left = event.offsetX + 'px';
 			onIWHover(event);
 		}
 	}}
