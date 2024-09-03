@@ -6,10 +6,12 @@
 	import PollChart from '../lib/components/charts/PollChart.svelte';
 	import { getMaxFromArray, getMinFromArray } from '../lib/utilities/ChartUtil';
 	import { groups } from 'd3';
+	import ColumnChart from '../lib/components/charts/ColumnChart.svelte';
 
 	let predictionLineData;
 	let multLineSeriesData;
 	let candidate_data;
+	let salesSingleBarData;
 
 	let data = [
 		{ x: 0, y: 4, label: 'A' },
@@ -34,6 +36,7 @@
 	onMount(async () => {
 		predictionLineData = await loadCsvData('../src/assets/poll_data.csv');
 		multLineSeriesData = await loadCsvData('../src/assets/multLineSeries.csv');
+		salesSingleBarData = await loadCsvData('../src/assets/salesSingleBar.csv');
 
 		multLineSeriesData.data = multLineSeriesData.data.map((item) => {
 			const convData = new Date(item.date);
@@ -54,6 +57,9 @@
 	{/if} -->
 	{#if candidate_data}
 		<PollChart chartData={candidate_data}></PollChart>
+	{/if}
+	{#if salesSingleBarData}
+		<ColumnChart chartData={salesSingleBarData} />
 	{/if}
 </main>
 

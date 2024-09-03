@@ -84,8 +84,6 @@
 			data: cleanedChartData,
 			candidates: Object.keys(cleanedChartData)
 		});
-
-		console.log('initial setup', chartState.data);
 	};
 	processCsvData();
 
@@ -108,8 +106,6 @@
 	const drawAreas = (candidateData, candidate, index) => {
 		const lowData = candidateData.Low;
 		const highData = candidateData.High;
-
-		console.log('YO', lowData, highData);
 
 		const areaData = area()
 			.x((d, i) => xScale(lowData[i].Date))
@@ -268,14 +264,6 @@
 				.attr('class', 'active-line-paths');
 			++colorIndex;
 		}
-
-		// console.log(invDate);
-		// const testData = chartState.data.data['Candidate A'].Estimate[15];
-		// interpolatedYScale = scaleLinear()
-		// 	.domain(chartState.data.data['Candidate A'].Estimate.map((d) => d.Date))
-		// 	.range(chartState.data.data['Candidate A'].Estimate.map((d) => d.Value));
-		// console.log(testData);
-		// console.log(interpolatedYScale(invDate));
 	};
 
 	const onIWHover = (mouseEvent) => {

@@ -1,4 +1,5 @@
 <script>
+	//these imports are based off if this code is run from /charts
 	import { initializeToolTip } from './interaction/TooltipUtility';
 	import SvgContainer from '../chartElements/SvgContainer.svelte';
 	import { initChartData } from '../../stores/ChartStore';
@@ -12,8 +13,14 @@
 	export let maxY;
 	export let maxX;
 
-	//chart state configuration
+	//chart body variables
+	let svgContainer;
+	let xScale;
+	let yScale;
+	let xAxis;
+	let yAxis;
 
+	//chart state configuration
 	let chartState;
 	let tooltipState;
 	const tooltipDisplay = {};
@@ -30,8 +37,9 @@
 	});
 
 	//func to take in JSON'd CSV data (which is passed in as chartData), do any specific chart-type cleaning here before hooking onto chartState;
-	const processCsvData = (chartData) => {};
-	processCsvData(chartData);
+	const processCsvData = (chartData) => {
+		chartStateDispatch.setChartData(chartData);
+	};
 
 	//resizing utility functions should be defined here before called in resizeFunc; debouncedResizer is what actually be called (for performance improvements)
 
@@ -40,7 +48,8 @@
 
 	//function to draw chart, put initial scale defining logic here. Can add chart drawing utility functions here as well for refactoring (recommended)
 	const loadChart = () => {
-		processCsvData();
+		processCsvData(chartData);
+		console.log(chartState);
 	};
 
 	onMount(() => {
@@ -57,7 +66,15 @@
 		unsubscribeChartState();
 	});
 
-	$: svgContainer && chartState?.chartContainer && chartState?.data && loadChart();
+	//bind svgContainer to svgContainer that's in state (that was linked up by passing chartStateDisptach to the SvgContianer component)
+	$: {
+		if (chartState?.svgContainer) {
+			svgContainer = chartState.svgContainer;
+		}
+	}
+
+	//renders chart only when all important components are defined
+	$: svgContainer && chartState?.chartContainer && loadChart();
 </script>
 
 <SvgContainer {chartStateDispatch} {resizeFunc} {tooltipState} {margin}>

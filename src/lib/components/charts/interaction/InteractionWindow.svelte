@@ -7,7 +7,6 @@
 
 	let interactionWindowRef;
 	let vTooltipRef;
-	console.log('Interaction Window', svgDivContainer, margin);
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
