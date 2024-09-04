@@ -9,8 +9,8 @@
 	export let tooltipState;
 	export let margin;
 	export let IW = false;
-	export let onIWHover;
-	export let onIWExit;
+	export let onIWHover = () => {};
+	export let onIWExit = () => {};
 
 	let chartContainerRef;
 	let svgRef;

@@ -59,7 +59,7 @@
 		<PollChart chartData={candidate_data}></PollChart>
 	{/if}
 	{#if salesSingleBarData}
-		<ColumnChart chartData={salesSingleBarData} />
+		<ColumnChart chartData={salesSingleBarData} maxY={200} />
 	{/if}
 </main>
 

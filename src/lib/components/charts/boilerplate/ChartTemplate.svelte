@@ -41,16 +41,16 @@
 		chartStateDispatch.setChartData(chartData);
 	};
 
-	//resizing utility functions should be defined here before called in resizeFunc; debouncedResizer is what actually be called (for performance improvements)
-
-	const resizeFunc = () => {};
-	const debouncedResizer = resizeDebounce(resizeFunc, 100);
-
 	//function to draw chart, put initial scale defining logic here. Can add chart drawing utility functions here as well for refactoring (recommended)
 	const loadChart = () => {
 		processCsvData(chartData);
 		console.log(chartState);
 	};
+
+	//resizing utility functions should be defined here before called in resizeFunc; debouncedResizer is what actually be called (for performance improvements)
+
+	const resizeFunc = () => {};
+	const debouncedResizer = resizeDebounce(resizeFunc, 100);
 
 	onMount(() => {
 		if (typeof window != 'undefined') {

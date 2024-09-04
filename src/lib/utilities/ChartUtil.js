@@ -1,9 +1,20 @@
-import { select, max, min, scaleLinear, scaleTime, axisLeft, axisBottom, line, extent } from 'd3';
+import {
+	select,
+	max,
+	min,
+	scaleLinear,
+	scaleTime,
+	axisLeft,
+	axisBottom,
+	line,
+	extent,
+	scaleBand
+} from 'd3';
 
-export const generateLinearXScale = (chartContainerRef, minVal, maxVal, margin) => {
+export const generateLinearXScale = (svgContainerRef, minVal, maxVal, margin) => {
 	//margin multiplied by 2 bc 50 margin is 50 margin on both sides
 	margin *= 2;
-	const containerWidth = chartContainerRef.getBoundingClientRect().width;
+	const containerWidth = svgContainerRef.getBoundingClientRect().width;
 
 	console.log('LOOK', minVal, maxVal);
 
@@ -14,10 +25,10 @@ export const generateLinearXScale = (chartContainerRef, minVal, maxVal, margin) 
 	return xScale;
 };
 
-export const generateLinearYScale = (chartContainerRef, minVal, maxVal, margin) => {
+export const generateLinearYScale = (svgContainerRef, minVal, maxVal, margin) => {
 	//margin multiplied by 2 bc 50 margin is 50 margin on both sides
 	margin *= 2;
-	const containerHeight = chartContainerRef.getBoundingClientRect().height;
+	const containerHeight = svgContainerRef.getBoundingClientRect().height;
 
 	const yScale = scaleLinear()
 		.domain([minVal, maxVal])
@@ -26,15 +37,22 @@ export const generateLinearYScale = (chartContainerRef, minVal, maxVal, margin) 
 	return yScale;
 };
 
-export const generateLinearScales = (chartContainerRef, xMin, xMax, yMin, yMax, margin) => {
-	const xScale = generateLinearXScale(chartContainerRef, xMin, xMax, margin);
-	const yScale = generateLinearYScale(chartContainerRef, yMin, yMax, margin);
+export const generateBandXScale = (svgContainerRef, bandArr, padding, margin) => {
+	const chartWidth = svgContainerRef.getBoundingClientRect().width - margin * 2;
+	const bandScale = scaleBand().domain(bandArr).rangeRound([chartWidth, 0]).padding(padding);
+
+	return bandScale;
+};
+
+export const generateLinearScales = (svgContainerRef, xMin, xMax, yMin, yMax, margin) => {
+	const xScale = generateLinearXScale(svgContainerRef, xMin, xMax, margin);
+	const yScale = generateLinearYScale(svgContainerRef, yMin, yMax, margin);
 
 	return { xScale, yScale };
 };
 
-export const generateXDateScale = (chartContainerRef, minVal, maxVal, margin) => {
-	const containerWidth = chartContainerRef.getBoundingClientRect().width;
+export const generateXDateScale = (svgContainerRef, minVal, maxVal, margin) => {
+	const containerWidth = svgContainerRef.getBoundingClientRect().width;
 	const xDateScale = scaleTime([minVal, maxVal], [0, containerWidth - margin * 2]);
 
 	return xDateScale;
@@ -42,7 +60,7 @@ export const generateXDateScale = (chartContainerRef, minVal, maxVal, margin) =>
 
 export const resizeScales = (
 	data,
-	chartContainerRef,
+	svgContainerRef,
 	xAxisElement,
 	yAxisElement,
 	xMin,
@@ -51,11 +69,11 @@ export const resizeScales = (
 	yMax,
 	margin
 ) => {
-	const containerHeight = chartContainerRef.offsetHeight;
+	const containerHeight = svgContainerRef.offsetHeight;
 
 	const { xScale, yScale } = generateLinearScales(
 		data,
-		chartContainerRef,
+		svgContainerRef,
 		xMin,
 		xMax,
 		yMin,
@@ -79,20 +97,20 @@ export const resizeScales = (
 	return { xScale, yScale };
 };
 
-export const updatePointPosition = (data, chartContainerRef, xScale, yScale, margin) => {
-	select(chartContainerRef)
+export const updatePointPosition = (data, svgContainerRef, xScale, yScale, margin) => {
+	select(svgContainerRef)
 		.selectAll('circle')
 		.transition()
 		.attr('cx', (d, i) => xScale(d.x) + margin / 2)
 		.attr('cy', (d, i) => yScale(d.y) + margin / 2);
 };
 
-export const updateLinePath = (chartContainerRef, xScale, yScale, margin) => {
+export const updateLinePath = (svgContainerRef, xScale, yScale, margin) => {
 	const lineData = line()
 		.x((d, i) => xScale(d.x))
 		.y((d, i) => yScale(d.y));
 
-	select(chartContainerRef).select('.line').transition().attr('d', lineData);
+	select(svgContainerRef).select('.line').transition().attr('d', lineData);
 };
 
 export const getMinFromArray = (data) => {
