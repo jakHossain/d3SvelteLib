@@ -254,14 +254,14 @@
 			select(svgContainer)
 				.select('.chartBody')
 				.append('g')
+				.attr('class', 'active-line-paths')
 				.append('path')
 				.datum(candidateData)
 				.attr('d', lineData)
 				.attr('fill', 'none')
 				.attr('stroke-width', '5px')
 				.attr('stroke', `${defaultColors[colorIndex]}`)
-				.attr('transform', `translate(${margin}, ${margin})`)
-				.attr('class', 'active-line-paths');
+				.attr('transform', `translate(${margin}, ${margin})`);
 			++colorIndex;
 		}
 	};

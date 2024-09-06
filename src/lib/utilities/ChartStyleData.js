@@ -1,12 +1,12 @@
 export const defaultColors = [
-	'#FF5733', // Vivid Red-Orange
-	'#33FF57', // Vivid Green
-	'#3357FF', // Vivid Blue
-	'#FF33A1', // Vivid Pink
-	'#FFD733', // Vivid Yellow
-	'#33FFF5', // Vivid Cyan
-	'#A133FF', // Vivid Purple
-	'#FF8F33', // Vivid Orange
-	'#33FF8F', // Vivid Mint Green
-	'#8F33FF' // Vivid Violet
+	'#D95236', // Muted Red-Orange
+	'#4FD97B', // Muted Green
+	'#4C6ED9', // Muted Blue
+	'#D94E89', // Muted Pink
+	'#D9B14D', // Muted Yellow
+	'#4DD9D4', // Muted Cyan
+	'#7A4DD9', // Muted Purple
+	'#D9824D', // Muted Orange
+	'#4DD98A', // Muted Mint Green
+	'#9C4DD9' // Muted Violet
 ];

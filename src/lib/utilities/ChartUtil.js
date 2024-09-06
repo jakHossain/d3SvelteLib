@@ -39,7 +39,7 @@ export const generateLinearYScale = (svgContainerRef, minVal, maxVal, margin) =>
 
 export const generateBandXScale = (svgContainerRef, bandArr, padding, margin) => {
 	const chartWidth = svgContainerRef.getBoundingClientRect().width - margin * 2;
-	const bandScale = scaleBand().domain(bandArr).rangeRound([chartWidth, 0]).padding(padding);
+	const bandScale = scaleBand().domain(bandArr).rangeRound([0, chartWidth]).padding(padding);
 
 	return bandScale;
 };

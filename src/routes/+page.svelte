@@ -7,11 +7,13 @@
 	import { getMaxFromArray, getMinFromArray } from '../lib/utilities/ChartUtil';
 	import { groups } from 'd3';
 	import ColumnChart from '../lib/components/charts/ColumnChart.svelte';
+	import GroupedColumnChart from '../lib/components/charts/GroupedColumnChart.svelte';
 
 	let predictionLineData;
 	let multLineSeriesData;
 	let candidate_data;
 	let salesSingleBarData;
+	let groupedBarData;
 
 	let data = [
 		{ x: 0, y: 4, label: 'A' },
@@ -37,6 +39,7 @@
 		predictionLineData = await loadCsvData('../src/assets/poll_data.csv');
 		multLineSeriesData = await loadCsvData('../src/assets/multLineSeries.csv');
 		salesSingleBarData = await loadCsvData('../src/assets/salesSingleBar.csv');
+		groupedBarData = await loadCsvData('../src/assets/groupedCol.csv');
 
 		multLineSeriesData.data = multLineSeriesData.data.map((item) => {
 			const convData = new Date(item.date);
@@ -60,6 +63,9 @@
 	{/if}
 	{#if salesSingleBarData}
 		<ColumnChart chartData={salesSingleBarData} maxY={200} />
+	{/if}
+	{#if groupedBarData}
+		<GroupedColumnChart chartData={groupedBarData} />
 	{/if}
 </main>
 
