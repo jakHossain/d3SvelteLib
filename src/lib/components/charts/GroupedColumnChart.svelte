@@ -110,7 +110,6 @@
 			})
 			.on('mousemove', function (event, d) {
 				enable({ top: event.clientY, left: event.clientX });
-				console.log(d);
 				tooltipDisplay.group = d.group;
 				tooltipDisplay.value = d.value;
 				tooltipDisplay.category = d.key;
@@ -137,7 +136,6 @@
 	const loadChart = () => {
 		processCsvData(chartData);
 		renderGroupsAndBars();
-		console.log(chartState.data.data.map((d) => d[chartState.data.fields[0]]));
 	};
 
 	//resizing utility functions should be defined here before called in resizeFunc; debouncedResizer is what actually be called (for performance improvements)

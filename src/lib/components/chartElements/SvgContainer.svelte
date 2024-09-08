@@ -61,7 +61,7 @@
 
 <style>
 	.chart-container {
-		height: 100%;
+		height: 400px;
 		width: 100%;
 		display: flex;
 		flex-direction: column;
