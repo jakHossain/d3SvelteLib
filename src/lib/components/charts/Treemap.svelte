@@ -5,7 +5,16 @@
 	import { initChartData } from '../../stores/ChartStore';
 	import { onDestroy, onMount } from 'svelte';
 	import { resizeDebounce } from '../../utilities/ChartUtil';
-	import { hierarchy, rollup, sum } from 'd3';
+	import {
+		hierarchy,
+		rollup,
+		select,
+		sum,
+		tree,
+		treemap,
+		treemapBinary,
+		treemapResquarify
+	} from 'd3';
 
 	export let chartData;
 	export let margin = 25;
@@ -48,6 +57,43 @@
 			(d) => d.Region,
 			(d) => d.Product
 		);
+
+		const { height, width } = svgContainer.getBoundingClientRect();
+
+		const treeObj = treemap()
+			.size([width - margin, height - margin])
+			.paddingOuter(2);
+
+		treeObj.tile(treemapBinary);
+
+		const root = hierarchy(cleanedData);
+
+		console.log('BEFORE: ', root);
+		root.sum((d) => d[1]);
+
+		console.log('AFTER: ', root);
+
+		treeObj(root);
+		select(svgContainer)
+			.select('.chartBody')
+			.selectAll('rect')
+			.data(root.descendants())
+			.join('rect')
+			.attr('x', function (d) {
+				return d.x0;
+			})
+			.attr('y', function (d) {
+				return d.y0;
+			})
+			.attr('width', function (d) {
+				return d.x1 - d.x0;
+			})
+			.attr('height', function (d) {
+				return d.y1 - d.y0;
+			})
+			.style('fill', 'cadetblue')
+			.attr('opacity', 0.3)
+			.attr('stroke', 'white');
 
 		console.log(hierarchy(cleanedData).descendants());
 

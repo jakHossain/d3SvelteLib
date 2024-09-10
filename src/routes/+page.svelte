@@ -40,10 +40,6 @@
 </script>
 
 <main>
-	<!-- <LineChart margin={50} {data} /> -->
-	<!-- {#if predictionLineData}
-		<PollChart data={predictionLineData.data} margin={50} />
-	{/if} -->
 	<!-- {#if multLineSeriesData}
 		<LineChart chartData={multLineSeriesData}></LineChart>
 	{/if} -->
